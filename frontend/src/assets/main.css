@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --color-bordeaux-50: #fdf2f4;
+  --color-bordeaux-100: #fce7eb;
+  --color-bordeaux-200: #f9d0d8;
+  --color-bordeaux-300: #f4a8b8;
+  --color-bordeaux-400: #ec7590;
+  --color-bordeaux-500: #e04570;
+  --color-bordeaux-600: #cc2755;
+  --color-bordeaux-700: #ac1a43;
+  --color-bordeaux-800: #8b1a3a;
+  --color-bordeaux-900: #6b0f2a;
+  --color-bordeaux-950: #4a0a1e;
+
+  --font-sans: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}
