@@ -5,12 +5,22 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
 
+//pour l'auto import
+import Components from 'unplugin-vue-components/vite'
+import { PrimeVueResolver } from '@primevue/auto-import-resolver'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     tailwindcss(),
     vue(),
     vueDevTools(),
+    // Configuration de l'auto-import
+        Components({
+            resolvers: [
+                PrimeVueResolver()
+            ],
+        }),
   ],
   resolve: {
     alias: {

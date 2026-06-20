@@ -1,19 +1,30 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import Button from 'primevue/button'
+// import InputText from 'primevue/inputtext'
+// import Password from 'primevue/password'
+// import Button from 'primevue/button'
 import { useThemeStore } from '@/stores/theme'
+import { useAuthStore } from '@/stores/auth'
 
 const theme = useThemeStore()
 const router = useRouter()
+const auth=useAuthStore()
 
-const form = ref({ name: '', email: '', password: '', password_confirmation: '' })
-const loading = ref(false)
 
-function submit() {
-  // TODO: appel API register
+const form = ref({ first_name: '', last_name:'', email: '', phone:'', password: '', password_confirmation: '' })
+// const loading = ref(false)
+
+const submit= async () => {
+  try {
+    
+    const success = await auth.register(form.value)
+    if(success){
+     router.push('/connexion')
+    }
+  } catch (error) {
+    console.error(`erreur d'inscription` , error)
+  }
 }
 </script>
 
@@ -54,12 +65,20 @@ function submit() {
           Rejoignez la bibliothèque numérique
         </p>
 
+
+        <!-- formulaire d'inscription -->
         <form @submit.prevent="submit" class="flex flex-col gap-4">
           <div class="flex flex-col gap-1.5">
             <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
-              Nom complet
+              Nom 
             </label>
-            <InputText v-model="form.name" placeholder="Jean Dupont" class="w-full" required />
+            <InputText v-model="form.first_name" placeholder=" Dupont" class="w-full" required />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
+             Prenom
+            </label>
+            <InputText v-model="form.last_name" placeholder="Jean " class="w-full" required />
           </div>
 
           <div class="flex flex-col gap-1.5">
@@ -67,6 +86,12 @@ function submit() {
               Adresse e-mail
             </label>
             <InputText v-model="form.email" type="email" placeholder="votre@email.com" class="w-full" required />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
+              Tel
+            </label>
+            <InputText v-model="form.phone" type="tel" placeholder="+237-655-19-15-94" class="w-full" required />
           </div>
 
           <div class="flex flex-col gap-1.5">
@@ -102,7 +127,7 @@ function submit() {
             type="submit"
             label="S'inscrire"
             icon="pi pi-user-plus"
-            :loading="loading"
+            :loading="auth.loading"
             class="w-full mt-1"
           />
         </form>
