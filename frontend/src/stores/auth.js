@@ -67,7 +67,7 @@ export const useAuthStore = defineStore('auth', {
 
 //Pour la redirection des selon le role après connexion
 
- redirectUseByRole(role){
+ redirectUserByRole(role){
     const routes ={
         'admin':'/admin/dashboard',
         'responsable_rh':'/rh/dashboard',
@@ -78,8 +78,35 @@ export const useAuthStore = defineStore('auth', {
 
     return routes[role] || '/'
 
-}
+},
+
+async logout() {
+  this.loading = true;
+  try {
+    // 1. Appeler le serveur pour détruire la session Laravel
+    await api.post('/logout');
+  } catch (error) {
+    console.error("Erreur lors de la déconnexion backend", error);
+  } finally {
+    // 2. Toujours vider le store et rediriger, même si le serveur a échoué
+    this.user = null;
+    this.loading = false;
+    
+    // 3. Redirection vers la page de connexion
+    window.location.href = '/connexion'; 
   }
+},
+
+async checkAuth() {
+  try {
+    const response = await api.get('/user');
+    this.user = response.data.user; // On réhydrate le store avec l'utilisateur
+  } catch (error) {
+    this.user = null; // Si le cookie n'est plus valide ou expiré
+  }
+}
+
+  },
 
   
 });

@@ -61,4 +61,21 @@ class AuthController extends Controller
         'user' => $user
     ], 200);
 }
+
+
+public function logout(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+{
+    // 1. Déconnecter l'utilisateur du garde de session
+    Auth::guard('web')->logout();
+
+    // 2. Invalider la session actuelle pour qu'elle ne soit plus réutilisable
+    $request->session()->invalidate();
+
+    // 3. Régénérer le jeton CSRF pour éviter les attaques après déconnexion
+    $request->session()->regenerateToken();
+
+    return response()->json([
+        'message' => 'Déconnexion réussie.'
+    ], 200);
+}
 }

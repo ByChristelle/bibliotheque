@@ -3,10 +3,12 @@ import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
 import Button from 'primevue/button'
+import { useAuthStore } from '@/stores/auth'
 
 const theme = useThemeStore()
 const router = useRouter()
 const route = useRoute()
+const auth =useAuthStore()
 
 const sidebarOpen = ref(true)
 
@@ -110,7 +112,7 @@ const navItems = computed(() => menus[role.value] ?? menus.user)
           label="Déconnexion"
           icon="pi pi-sign-out"
           text severity="danger" size="small"
-          @click="router.push('/connexion')"
+          @click="auth.logout()"
         />
         <Button
           v-else

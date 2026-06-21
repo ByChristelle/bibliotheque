@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth' // <-- Correction de l'import manquant
 
 import PublicLayout from '@/layouts/PublicLayout.vue'
 import AuthLayout from '@/layouts/AuthLayout.vue'
@@ -18,14 +19,14 @@ const router = createRouter({
     },
 
     // ── Auth ────────────────────────────────────────────
-    { path: '/connexion', name: 'login', component: () => import('@/views/auth/LoginView.vue') },
-    { path: '/inscription', name: 'register', component: () => import('@/views/auth/RegisterView.vue') },
+    { path: '/connexion', name: 'login', component: () => import('@/views/auth/LoginView.vue'), meta: { requiresGuest: true } },
+    { path: '/inscription', name: 'register', component: () => import('@/views/auth/RegisterView.vue'), meta: { requiresGuest: true } },
 
     // ── Utilisateur inscrit ─────────────────────────────
     {
       path: '/espace',
       component: AuthLayout,
-      meta: { requiresAuth: true, role: 'user' },
+      meta: { requiresAuth: true, allowedRoles: ['user'] }, // <-- Utilisation cohérente de allowedRoles
       children: [
         { path: 'dashboard', name: 'user-dashboard', component: () => import('@/views/user/DashboardView.vue'), meta: { title: 'Tableau de bord' } },
         { path: 'mes-demandes', name: 'mes-demandes', component: () => import('@/views/user/MesDemandesView.vue'), meta: { title: 'Mes demandes' } },
@@ -37,7 +38,7 @@ const router = createRouter({
     {
       path: '/responsable',
       component: AuthLayout,
-      meta: { requiresAuth: true, role: 'responsable_demande' },
+      meta: { requiresAuth: true, allowedRoles: ['responsable_demande'] },
       children: [
         { path: 'dashboard', name: 'responsable-dashboard', component: () => import('@/views/responsable/DashboardResponsableView.vue'), meta: { title: 'Tableau de bord' } },
         { path: 'demandes', name: 'demandes-affectees', component: () => import('@/views/responsable/DemandesAffecteesView.vue'), meta: { title: 'Demandes affectées' } },
@@ -48,7 +49,7 @@ const router = createRouter({
     {
       path: '/rh',
       component: AuthLayout,
-      meta: { requiresAuth: true, role: 'responsable_rh' },
+      meta: { requiresAuth: true, allowedRoles: ['responsable_rh'] },
       children: [
         { path: 'dashboard', name: 'rh-dashboard', component: () => import('@/views/rh/DashboardRHView.vue'), meta: { title: 'Tableau de bord RH' } },
         { path: 'utilisateurs', name: 'rh-utilisateurs', component: () => import('@/views/rh/GestionUtilisateursView.vue'), meta: { title: 'Utilisateurs' } },
@@ -59,7 +60,7 @@ const router = createRouter({
     {
       path: '/admin',
       component: AuthLayout,
-      meta: { requiresAuth: true, role: 'admin' },
+      meta: { requiresAuth: true, allowedRoles: ['admin'] },
       children: [
         { path: 'dashboard', name: 'admin-dashboard', component: () => import('@/views/admin/DashboardAdminView.vue'), meta: { title: 'Tableau de bord' } },
         { path: 'demandes', name: 'admin-demandes', component: () => import('@/views/admin/GestionDemandesView.vue'), meta: { title: 'Demandes' } },
@@ -73,6 +74,37 @@ const router = createRouter({
     // ── Fallback ─────────────────────────────────────────
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+
+  // 1. Si déjà connecté -> interdit d'aller sur login/register
+  if (to.matched.some(record => record.meta.requiresGuest) && auth.user) {
+    const safeRoute = auth.redirectUserByRole(auth.user.role)
+    return next(safeRoute)
+  }
+
+  // 2. Si la route (ou un de ses parents) exige d'être connecté
+  if (to.matched.some(record => record.meta.requiresAuth) && !auth.user) {
+    return next('/connexion')
+  }
+
+  // 3. Vérification approfondie des rôles autorisés (parents inclus)
+  const structuralRoles = to.matched.reduce((roles, record) => {
+    if (record.meta.allowedRoles) {
+      roles.push(...record.meta.allowedRoles)
+    }
+    return roles;
+  }, [])
+
+  if (structuralRoles.length > 0 && !structuralRoles.includes(auth.user?.role)) {
+    // Rôle invalide détecté -> Expulsion vers sa zone autorisée
+    const safeRoute = auth.redirectUserByRole(auth.user?.role)
+    return next(safeRoute)
+  }
+
+  next()
 })
 
 export default router

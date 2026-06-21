@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->string('password');
+            $table->string('avatar')->nullable();
             
             $table->enum('role', ['admin', 'responsable_rh', 'responsable_demande', 'user'])->default('user');
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
