@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -37,4 +38,27 @@ class AuthController extends Controller
             'user' => $user
         ], 201);
     }
+
+    public function login(LoginRequest $request): JsonResponse
+{
+    // 1. Tenter l'authentification avec les identifiants validés
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        // Si ça échoue, on renvoie une erreur 422 claire (compatible avec Pinia)
+        throw ValidationException::withMessages([
+            'email' => ['Ces identifiants ne correspondent pas à nos enregistrements.'],
+        ]);
+    }
+
+    // 2. Sécurité : Régénérer la session pour éviter la fixation de session
+    $request->session()->regenerate();
+
+    // 3. Récupérer l'utilisateur connecté
+    $user = Auth::user();
+
+    // 4. Retourner l'utilisateur au Frontend
+    return response()->json([
+        'message' => 'Connexion réussie.',
+        'user' => $user
+    ], 200);
+}
 }

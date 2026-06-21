@@ -6,10 +6,12 @@ import { useRouter } from 'vue-router'
 // import Button from 'primevue/button'
 import { useThemeStore } from '@/stores/theme'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'primevue'
 
 const theme = useThemeStore()
 const router = useRouter()
 const auth=useAuthStore()
+const toast=useToast()
 
 
 const form = ref({ first_name: '', last_name:'', email: '', phone:'', password: '', password_confirmation: '' })
@@ -20,9 +22,22 @@ const submit= async () => {
     
     const success = await auth.register(form.value)
     if(success){
-     router.push('/connexion')
+
+       toast.add({
+        severity: 'success',
+        summary: 'Inscription réussie',
+        detail: auth.message, //  le message récupéré depuis la réponse
+        life: 4000
+      })
+     router.push('/espace')
     }
   } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: "Une erreur est survenue lors de l'inscription.",
+      life: 4000
+    })
     console.error(`erreur d'inscription` , error)
   }
 }

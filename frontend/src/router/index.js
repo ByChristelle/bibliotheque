@@ -37,7 +37,7 @@ const router = createRouter({
     {
       path: '/responsable',
       component: AuthLayout,
-      meta: { requiresAuth: true, role: 'responsable' },
+      meta: { requiresAuth: true, role: 'responsable_demande' },
       children: [
         { path: 'dashboard', name: 'responsable-dashboard', component: () => import('@/views/responsable/DashboardResponsableView.vue'), meta: { title: 'Tableau de bord' } },
         { path: 'demandes', name: 'demandes-affectees', component: () => import('@/views/responsable/DemandesAffecteesView.vue'), meta: { title: 'Demandes affectées' } },
@@ -48,7 +48,7 @@ const router = createRouter({
     {
       path: '/rh',
       component: AuthLayout,
-      meta: { requiresAuth: true, role: 'rh' },
+      meta: { requiresAuth: true, role: 'responsable_rh' },
       children: [
         { path: 'dashboard', name: 'rh-dashboard', component: () => import('@/views/rh/DashboardRHView.vue'), meta: { title: 'Tableau de bord RH' } },
         { path: 'utilisateurs', name: 'rh-utilisateurs', component: () => import('@/views/rh/GestionUtilisateursView.vue'), meta: { title: 'Utilisateurs' } },

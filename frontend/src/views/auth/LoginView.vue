@@ -5,15 +5,32 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
 import { useThemeStore } from '@/stores/theme'
+import { useAuthStore } from '@/stores/auth'
 
 const theme = useThemeStore()
 const router = useRouter()
+const auth =useAuthStore()
 
 const form = ref({ email: '', password: '' })
-const loading = ref(false)
+// const loading = ref(false)
 
-function submit() {
-  // TODO: appel API auth
+const  submit= async () => {
+  try {
+    const success= await auth.login(form.value);
+    if(success){
+
+      const userRole=auth.user.role //ici on récupère le role de l'utilisateur qui veut se connecté
+      const targetRoute =auth.redirectUseByRole(userRole)
+
+      router.push(targetRoute)//obtention d'une route dymanique
+    }
+    
+  } catch (error) {
+    console.error('erreur de connexion' , error);
+    
+    
+  }
+ 
 }
 </script>
 
@@ -101,7 +118,7 @@ function submit() {
             type="submit"
             label="Se connecter"
             icon="pi pi-sign-in"
-            :loading="loading"
+            :loading="auth.loading"
             class="w-full mt-1"
           />
         </form>
