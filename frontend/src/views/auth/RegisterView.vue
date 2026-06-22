@@ -47,21 +47,18 @@ const submit= async () => {
   <div :class="['min-h-screen flex items-center justify-center relative transition-colors duration-300',
     theme.isDark
       ? 'bg-gradient-to-br from-bordeaux-950 via-bordeaux-900 to-bordeaux-950'
-      : 'bg-gradient-to-br from-bordeaux-50 via-bordeaux-100 to-bordeaux-200']">
+      : 'bg-white']">
 
     <!-- Orbs -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute -top-32 -left-20 w-[400px] h-[400px] rounded-full opacity-30"
-           :class="theme.isDark ? 'bg-bordeaux-700' : 'bg-bordeaux-400'"
+      <div class="absolute -top-32 -left-20 w-[400px] h-[400px] rounded-full"
+           :class="theme.isDark ? 'opacity-30 bg-bordeaux-700' : 'opacity-5 bg-bordeaux-700'"
            style="filter: blur(80px)"></div>
-      <div class="absolute -bottom-20 -right-20 w-72 h-72 rounded-full opacity-25"
-           :class="theme.isDark ? 'bg-bordeaux-900' : 'bg-bordeaux-300'"
-           style="filter: blur(70px)"></div>
     </div>
 
     <div class="relative z-10 w-full max-w-md px-4">
-      <div :class="['rounded-2xl p-8 backdrop-blur-xl border shadow-2xl',
-        theme.isDark ? 'bg-white/5 border-white/10' : 'bg-white/20 border-white/50']">
+      <div :class="['rounded-2xl p-8 border shadow-sm',
+        theme.isDark ? 'bg-white/5 backdrop-blur-xl border-white/10' : 'bg-white border-gray-200']">
 
         <!-- Brand -->
         <div class="text-center mb-6">
@@ -73,10 +70,10 @@ const submit= async () => {
           </h1>
         </div>
 
-        <h2 :class="['text-2xl font-bold mb-1', theme.isDark ? 'text-bordeaux-100' : 'text-bordeaux-900']">
+        <h2 :class="['text-2xl font-bold mb-1', theme.isDark ? 'text-bordeaux-100' : 'text-gray-900']">
           Créer un compte
         </h2>
-        <p :class="['text-sm mb-6', theme.isDark ? 'text-bordeaux-400' : 'text-bordeaux-600']">
+        <p :class="['text-sm mb-6', theme.isDark ? 'text-bordeaux-400' : 'text-gray-500']">
           Rejoignez la bibliothèque numérique
         </p>
 
@@ -84,33 +81,33 @@ const submit= async () => {
         <!-- formulaire d'inscription -->
         <form @submit.prevent="submit" class="flex flex-col gap-4">
           <div class="flex flex-col gap-1.5">
-            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
+            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-gray-700']">
               Nom 
             </label>
             <InputText v-model="form.first_name" placeholder=" Dupont" class="w-full" required />
           </div>
           <div class="flex flex-col gap-1.5">
-            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
+            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-gray-700']">
              Prenom
             </label>
             <InputText v-model="form.last_name" placeholder="Jean " class="w-full" required />
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
+            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-gray-700']">
               Adresse e-mail
             </label>
             <InputText v-model="form.email" type="email" placeholder="votre@email.com" class="w-full" required />
           </div>
           <div class="flex flex-col gap-1.5">
-            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
+            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-gray-700']">
               Tel
             </label>
             <InputText v-model="form.phone" type="tel" placeholder="+237-655-19-15-94" class="w-full" required />
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
+            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-gray-700']">
               Mot de passe
             </label>
             <Password
@@ -124,7 +121,7 @@ const submit= async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-bordeaux-700']">
+            <label :class="['text-sm font-semibold', theme.isDark ? 'text-bordeaux-300' : 'text-gray-700']">
               Confirmer le mot de passe
             </label>
             <Password
@@ -147,7 +144,7 @@ const submit= async () => {
           />
         </form>
 
-        <p :class="['text-center text-sm mt-5', theme.isDark ? 'text-bordeaux-400' : 'text-bordeaux-600']">
+        <p :class="['text-center text-sm mt-5', theme.isDark ? 'text-bordeaux-400' : 'text-gray-500']">
           Déjà inscrit ?
           <RouterLink to="/connexion"
             :class="['font-semibold no-underline hover:underline ml-1',
