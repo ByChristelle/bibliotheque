@@ -20,7 +20,7 @@ const  submit= async () => {
     if(success){
 
       const userRole=auth.user.role //ici on récupère le role de l'utilisateur qui veut se connecté
-      const targetRoute =auth.redirectUseByRole(userRole)
+      const targetRoute =auth.redirectUserByRole(userRole)
 
       router.push(targetRoute)//obtention d'une route dymanique
     }
@@ -37,12 +37,12 @@ const  submit= async () => {
 <template>
   <div :class="['min-h-screen flex items-center justify-center relative transition-colors duration-300',
     theme.isDark
-      ? 'bg-gradient-to-br from-bordeaux-950 via-bordeaux-900 to-bordeaux-950'
+      ? 'bg-gradient-to-brfrom-bordeaux-950 via-bordeaux-900 to-bordeaux-950'
       : 'bg-white']">
 
     <!-- Orbs -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute -top-32 -right-20 w-[450px] h-[450px] rounded-full"
+      <div class="absolute -top-32 -right-20 w-[450px]h-[450px] rounded-full"
            :class="theme.isDark ? 'opacity-30 bg-bordeaux-700' : 'opacity-5 bg-bordeaux-700'"
            style="filter: blur(80px)"></div>
     </div>
@@ -56,7 +56,7 @@ const  submit= async () => {
 
         <!-- Brand -->
         <div class="text-center mb-6">
-          <div class="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center bg-gradient-to-br from-bordeaux-700 to-bordeaux-900 shadow-lg">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center bg-gradient-to-brfrom-bordeaux-700 to-bordeaux-900 shadow-lg">
             <i class="pi pi-book text-white text-2xl"></i>
           </div>
           <h1 :class="['text-xl font-bold', theme.isDark ? 'text-bordeaux-200' : 'text-bordeaux-800']">

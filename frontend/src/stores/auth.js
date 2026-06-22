@@ -6,7 +6,8 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     message:null,
     loading: false,
-    errors: {} 
+    errors: {} ,
+    
   }),
 
   actions: {
@@ -79,6 +80,22 @@ export const useAuthStore = defineStore('auth', {
     return routes[role] || '/'
 
 },
+
+async fetchMe() {
+      try {
+        const response = await api.get('/me')
+        if (response.data && response.data.user) {
+          // Session valide : On met à jour les infos (rôle, avatar, etc.)
+          this.user = response.data.user
+          localStorage.setItem('user', JSON.stringify(response.data.user))
+        }
+      } catch (error) {
+        // Session expirée côté Laravel (Erreur 401, etc.) : On nettoie tout
+        this.user = null
+        localStorage.removeItem('user')
+        router.push('/login') // Redirection automatique vers le login
+      }
+    },
 
 async logout() {
   this.loading = true;

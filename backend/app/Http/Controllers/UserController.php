@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+
+    public function index(){
+        $user=User::latest()->get();
+        
+        return response()->json([
+          'users'=> $user,
+        ],200);
+    }
     public function store(StoreUsersRequest $request): JsonResponse
     {
         $data = $request->validated();

@@ -30,7 +30,12 @@ app.use(pinia)
 const auth = useAuthStore()
 
 // On vérifie l'authentification AVANT de monter le routeur
-auth.checkAuth().finally(() => {
-  app.use(router)
-  app.mount('#app')
-})
+// auth.checkAuth().finally(() => {
+// })
+
+const authStore = useAuthStore()
+if (authStore.user) {
+  authStore.fetchMe()
+}
+app.use(router)
+app.mount('#app')

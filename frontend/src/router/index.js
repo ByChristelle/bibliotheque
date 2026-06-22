@@ -78,33 +78,18 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
-
-  // 1. Si déjà connecté -> interdit d'aller sur login/register
-  if (to.matched.some(record => record.meta.requiresGuest) && auth.user) {
-    const safeRoute = auth.redirectUserByRole(auth.user.role)
-    return next(safeRoute)
+  
+  if(to.meta.requiresGuest){
+    next()
+    console.log(auth.user.role);
   }
-
-  // 2. Si la route (ou un de ses parents) exige d'être connecté
-  if (to.matched.some(record => record.meta.requiresAuth) && !auth.user) {
-    return next('/connexion')
+  // const userRole= auth.user.role
+  // const rolee=auth.redirectUserByRole(userRole)
+  // router.push(rolee)
+  
+  if (to.meta.requiresAuth && auth.user  ) {
+    next()
   }
-
-  // 3. Vérification approfondie des rôles autorisés (parents inclus)
-  const structuralRoles = to.matched.reduce((roles, record) => {
-    if (record.meta.allowedRoles) {
-      roles.push(...record.meta.allowedRoles)
-    }
-    return roles;
-  }, [])
-
-  if (structuralRoles.length > 0 && !structuralRoles.includes(auth.user?.role)) {
-    // Rôle invalide détecté -> Expulsion vers sa zone autorisée
-    const safeRoute = auth.redirectUserByRole(auth.user?.role)
-    return next(safeRoute)
-  }
-
-  next()
 })
 
 export default router

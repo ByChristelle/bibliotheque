@@ -3,32 +3,29 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController; // <-- IL MANQUAIT CETTE LIGNE ICI !
+use App\Http\Controllers\UserController; 
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-
-// Route publique pour l'inscription, accessible uniquement par les invités (middleware guest)
+// ── 1. Routes Publiques (Visiteurs) ──────────────────────────────────
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Routes accessibles uniquement aux utilisateurs connectés
-Route::middleware('auth:sanctum')->group(function () {
+
+// ── 2. Routes Privées (Utilisateurs connectés via Session/Cookie) ────
+Route::middleware('auth')->group(function () {
+    
+    // Déconnexion propre
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Permet au Frontend de récupérer l'utilisateur connecté via le cookie
-    Route::get('/user', function (\Illuminate\Http\Request $request) {
-        return response()->json(['user' => $request->user()]);
-    });
+    // Route standard /me reliée à ton AuthController
+    Route::get('/me', [AuthController::class, 'me']); 
 
-    // Votre route simple, bien au chaud dans le groupe auth
+    // Gestion des utilisateurs
+    Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);
 });
 
 
-// ── Route de test ─────────────────────────────────────────────────────────────
+// ── 3. Route de test ──────────────────────────────────────────────────
 Route::get('/test', fn () => response()->json([
     'status'  => true,
     'message' => 'API is working correctly 🚀',

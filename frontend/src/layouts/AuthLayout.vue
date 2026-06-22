@@ -111,12 +111,12 @@ const navItems = computed(() => menus[role.value] ?? menus.user)
           text severity="danger" size="small"
           @click="auth.logout()"
         />
-        <Button
+        <!-- <Button
           v-else
           icon="pi pi-sign-out"
           rounded text severity="danger" size="small"
           @click="router.push('/connexion')"
-        />
+        /> -->
       </div>
     </aside>
 

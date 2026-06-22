@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -78,4 +79,15 @@ public function logout(\Illuminate\Http\Request $request): \Illuminate\Http\Json
         'message' => 'Déconnexion réussie.'
     ], 200);
 }
+
+public function me(\Illuminate\Http\Request $request): JsonResponse
+    {
+        // Récupère l'utilisateur actuellement authentifié via la session
+        $user = $request->user();
+
+        return response()->json([
+            'user' => $user
+        ], 200);
+    }
+
 }
