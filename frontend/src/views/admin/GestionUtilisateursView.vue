@@ -2,6 +2,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { useUsersStore } from '@/stores/users'
+import { useToast } from 'primevue'
+import { useConfirm } from 'primevue/useconfirm'
+// import { Loader2}  from 'lucide-vue-next';
+
+
+      
+const toast=useToast()
+const confirm= useConfirm()
+
 
 const theme = useThemeStore()
 const usersStore = useUsersStore()
@@ -24,6 +33,8 @@ const roles = [
   { label: 'Administrateur', value: 'admin' },
 ]
 
+
+//Pour l'affichage des utilisateurs
 onMounted(async () => {
   loading.value = true
   try {
@@ -65,6 +76,7 @@ const closeDialog = () => {
   showDialog.value = false
   isEditing.value = false
   currentUserId.value = null
+  usersStore.errors = null
   newUser.value = { first_name: '', last_name: '', email: '', phone: '', role: 'user', password: '' }
 }
 
@@ -72,8 +84,30 @@ const closeDialog = () => {
 const saveUser = async () => {
   if (isEditing.value) {
     // Mode Modification
-    const success = await usersStore.updateUser(currentUserId.value, newUser.value)
-    if (success) closeDialog()
+    try {
+      
+      const success = await usersStore.updateUser(currentUserId.value, newUser.value)
+      if (success){
+        closeDialog()
+         toast.add({
+        severity: 'success',
+        summary: 'Modification réussie',
+        detail: usersStore.message, //  le message récupéré depuis la réponse
+        // icon: 'pi pi-check',
+        life: 4000
+      })
+        
+      } 
+    } catch (error) {
+      toast.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: "Une erreur est survenue lors de la modification.",
+      life: 4000
+    })
+    console.error(`erreur de modification` , error)
+      
+    }
   } else {
     // Mode Création standard
     const formData = new FormData()
@@ -84,22 +118,124 @@ const saveUser = async () => {
     formData.append('password', newUser.value.password)
     if (newUser.value.phone) formData.append('phone', newUser.value.phone)
 
-    const success = await usersStore.createUser(formData)
-    if (success) closeDialog()
+    try {
+      
+      const success = await usersStore.createUser(formData)
+      if (success){
+        closeDialog()
+
+         toast.add({
+        severity: 'success',
+        summary: 'Creation réussie',
+        detail: usersStore.message, //  le message récupéré depuis la réponse
+        // icon: 'pi pi-check',
+        life: 4000
+      })
+      } 
+        
+    }  catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: "Une erreur est survenue lors de la création.",
+      life: 4000
+    })
+    console.error(`erreur de création` , error)
+  }
+      
+    }
+  }
+
+
+// ── ACTION 2 : DÉSACTIVER / ACTIVER un utilisateur ─────────────────────
+// Modal de changement de statut
+const showStatusDialog = ref(false)
+const selectedUser = ref(null)
+const selectedStatus = ref('')
+const statusOptions = [
+  { label: 'Actif', value: 'active' },
+  { label: 'Désactivé', value: 'inactive' },
+  { label: 'Suspendu', value: 'suspended' }
+]
+
+// Ouvrir le modal de changement de statut
+const toggleUserStatus = (user) => {
+  selectedUser.value = user
+  selectedStatus.value = user.status // Pré-sélectionner le statut actuel
+  showStatusDialog.value = true
+}
+
+// Confirmer et appliquer le changement de statut
+const confirmStatusChange = async () => {
+  if (selectedUser.value && selectedStatus.value) {
+    await usersStore.changeStatus(selectedUser.value.id, selectedStatus.value)
+    toast.add({
+      severity: 'success',
+      summary: 'Statut modifié',
+      detail: `Le statut de ${selectedUser.value.first_name} ${selectedUser.value.last_name} a été mis à jour`,
+      life: 4000
+    })
+    closeStatusDialog()
   }
 }
 
-// ── ACTION 2 : DÉSACTIVER / ACTIVER un utilisateur ─────────────────────
-const toggleUserStatus = async (user) => {
-  const nextStatus = (user.status === 'active' || user.status === 'actif') ? 'inactive' : 'active'
-  if (confirm(`Voulez-vous changer le statut de cet utilisateur en : ${nextStatus} ?`)) {
-    await usersStore.changeStatus(user.id, nextStatus)
+// Fermer le modal de statut
+const closeStatusDialog = () => {
+  showStatusDialog.value = false
+  selectedUser.value = null
+  selectedStatus.value = ''
+}
+
+// Fonction pour obtenir le label du statut
+const getStatusLabel = (status) => {
+  const labels = {
+    'active': 'Actif',
+    'actif': 'Actif',
+    'inactive': 'Désactivé',
+    'suspended': 'Suspendu',
+    'archived': 'Archivé'
   }
+  return labels[status] || status
+}
+
+// Fonction pour obtenir la severity du Tag
+const getStatusSeverity = (status) => {
+  const severities = {
+    'active': 'success',
+    'actif': 'success',
+    'inactive': 'warn',
+    'suspendu': 'warning',
+    'archived': 'danger'
+  }
+  return severities[status] || 'secondary'
 }
 
 // ── ACTION 3 : ARCHIVER un utilisateur ─────────────────────────────────
 const archiveUser = async (user) => {
 
+   try {
+    
+    const success = await usersStore.deleteUser(user.id)
+    if(success){
+
+       toast.add({
+        severity: 'success',
+        summary: 'Archive réussie',
+        detail: usersStore.message, //  le message récupéré depuis la réponse
+        // icon: 'pi pi-check',
+        life: 4000
+      })
+    
+    }
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: "Une erreur est survenue lors de l'archive.",
+      life: 4000
+    })
+    console.error(`erreur d'archive` , error)
+  }
   
 }
 </script>
@@ -127,7 +263,8 @@ const archiveUser = async (user) => {
       theme.isDark ? 'bg-white/5 border-white/10' : 'bg-white/30 border-white/50']">
 
       <div v-if="loading" class="p-6 flex items-center justify-center">
-        <i class="pi pi-spin pi-spinner text-3xl text-bordeaux-700"></i>
+        <!-- <Loader2 class="w-10 h-10 text-primary-500 animate-spin mb-4" /> -->
+        <!-- <i class="pi pi-spin pi-spinner text-3xl text-bordeaux-700"></i> -->
         <span class="ml-3 text-sm">Chargement des utilisateurs...</span>
       </div>
       
@@ -147,13 +284,13 @@ const archiveUser = async (user) => {
         </Column>
         
         <Column field="status" header="Statut">
-          <template #body="{ data }">
-            <Tag 
-              :value="data.status === 'active' || data.status === 'actif' ? 'Actif' : (data.status === 'archived' ? 'Archivé' : 'Désactivé')" 
-              :severity="data.status === 'active' || data.status === 'actif' ? 'success' : (data.status === 'archived' ? 'danger' : 'warn')" 
-            />
-          </template>
-        </Column>
+  <template #body="{ data }">
+    <Tag 
+      :value="getStatusLabel(data.status)" 
+      :severity="getStatusSeverity(data.status)" 
+    />
+  </template>
+</Column>
         
        <Column header="Actions">
   <template #body="{ data }">
@@ -205,47 +342,74 @@ const archiveUser = async (user) => {
     </div>
 
     <Dialog v-model:visible="showDialog" modal :header="isEditing ? 'Modifier l\'utilisateur' : 'Créer un nouvel utilisateur'" :style="{ width: '30rem' }" @hide="closeDialog">
-      <form @submit.prevent="saveUser" class="flex flex-col gap-4 mt-2">
-        
-        <div class="grid grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1">
-            <label class="font-semibold text-sm">Prénom</label>
-            <InputText v-model="newUser.first_name" required />
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="font-semibold text-sm">Nom</label>
-            <InputText v-model="newUser.last_name" required />
-          </div>
-        </div>
+  <form @submit.prevent="saveUser" class="flex flex-col gap-4 mt-2">
+    
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm">Prénom</label>
+        <InputText v-model="newUser.first_name" :invalid="!!usersStore.errors?.first_name" required />
+        <small v-if="usersStore.errors?.first_name" class="text-red-500 text-xs">{{ usersStore.errors.first_name[0] }}</small>
+      </div>
+      
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm">Nom</label>
+        <InputText v-model="newUser.last_name" :invalid="!!usersStore.errors?.last_name" required />
+        <small v-if="usersStore.errors?.last_name" class="text-red-500 text-xs">{{ usersStore.errors.last_name[0] }}</small>
+      </div>
+    </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm">Adresse Email</label>
-          <InputText type="email" v-model="newUser.email" required />
-        </div>
+    <div class="flex flex-col gap-1">
+      <label class="font-semibold text-sm">Adresse Email</label>
+      <InputText type="email" v-model="newUser.email" :invalid="!!usersStore.errors?.email" required />
+      <small v-if="usersStore.errors?.email" class="text-red-500 text-xs">{{ usersStore.errors.email[0] }}</small>
+    </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm">Téléphone</label>
-          <InputText v-model="newUser.phone" placeholder="Ex: +225..." />
-        </div>
+    <div class="flex flex-col gap-1">
+      <label class="font-semibold text-sm">Téléphone</label>
+      <InputText v-model="newUser.phone" placeholder="Ex: +225..." :invalid="!!usersStore.errors?.phone" />
+      <small v-if="usersStore.errors?.phone" class="text-red-500 text-xs">{{ usersStore.errors.phone[0] }}</small>
+    </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm">Rôle</label>
-          <Select v-model="newUser.role" :options="formRoles" optionLabel="label" optionValue="value" required />
-        </div>
+    <div class="flex flex-col gap-1">
+      <label class="font-semibold text-sm">Rôle</label>
+      <Select v-model="newUser.role" :options="formRoles" optionLabel="label" optionValue="value" :invalid="!!usersStore.errors?.role" required />
+      <small v-if="usersStore.errors?.role" class="text-red-500 text-xs">{{ usersStore.errors.role[0] }}</small>
+    </div>
 
-        <!-- <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm">
-            {{ isEditing ? 'Changer le mot de passe (Optionnel)' : 'Mot de passe initial' }}
-          </label>
-          <InputText type="password" v-model="newUser.password" :required="!isEditing" />
-        </div> -->
+    <div class="flex flex-col gap-1">
+      <label class="font-semibold text-sm">
+        {{ isEditing ? 'Changer le mot de passe (Optionnel)' : 'Mot de passe initial' }}
+      </label>
+      <InputText type="password" v-model="newUser.password" :invalid="!!usersStore.errors?.password" :required="!isEditing" />
+      <small v-if="usersStore.errors?.password" class="text-red-500 text-xs">{{ usersStore.errors.password[0] }}</small>
+    </div>
 
-        <div class="flex justify-end gap-2 mt-2">
-          <Button type="button" label="Annuler" severity="secondary" text @click="closeDialog" />
-          <Button type="submit" :label="isEditing ? 'Mettre à jour' : 'Enregistrer'" :loading="usersStore.loading" />
-        </div>
-        <pre v-if="usersStore.errors" class="text-red-500 text-xs">{{ usersStore.errors }}</pre>
-      </form>
-    </Dialog>
+    <div class="flex justify-end gap-2 mt-2">
+      <Button type="button" label="Annuler" severity="secondary" text @click="closeDialog" />
+      <Button type="submit" :label="isEditing ? 'Mettre à jour' : 'Enregistrer'" :loading="usersStore.loading" />
+    </div>
+  </form>
+</Dialog>
+
+
+<!-- Modal pour changer le statut d'un utilisateur -->
+<Dialog v-model:visible="showStatusDialog" modal header="Changer le statut" :style="{ width: '30rem' }" @hide="closeStatusDialog">
+  <div class="flex flex-col gap-4">
+    <div v-if="selectedUser" class="p-3 rounded-lg" :class="theme.isDark ? 'bg-white/5' : 'bg-gray-100'">
+      <p class="font-semibold">{{ selectedUser.first_name }} {{ selectedUser.last_name }}</p>
+      <p class="text-sm text-gray-500">{{ selectedUser.email }}</p>
+    </div>
+    
+    <div class="flex flex-col gap-1">
+      <label class="font-semibold text-sm">Nouveau statut</label>
+      <Select v-model="selectedStatus" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Choisissez un statut" />
+    </div>
+    
+    <div class="flex justify-end gap-2 mt-2">
+      <Button type="button" label="Annuler" severity="secondary" text @click="closeStatusDialog" />
+      <Button type="button" label="Confirmer" @click="confirmStatusChange" :loading="usersStore.loading" />
+    </div>
+  </div>
+</Dialog>
   </div>
 </template>

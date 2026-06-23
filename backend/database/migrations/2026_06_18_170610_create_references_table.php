@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('subtitle')->nullable();
             $table->text('abstract')->nullable();
             $table->string('isbn')->nullable();
-            $table->year('publication_year')->nullable();
+            $table->smallInteger('publication_year')->nullable();
             $table->enum('language', ['fr', 'en', 'autre'])->default('fr');
             $table->enum('document_type', ['livre', 'memoire', 'these', 'article', 'revue', 'rapport', 'guide', 'autre']);
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
@@ -30,6 +30,7 @@ return new class extends Migration
             $table->unsignedInteger('view_count')->default(0);
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

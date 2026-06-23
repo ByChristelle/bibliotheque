@@ -1,18 +1,20 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-
-import App from './App.vue'
-import router from './router'
-import './assets/main.css'
-
+import App from '@/App.vue'
+import router from '@/router/index.js'
+import '@/assets/main.css'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
-import BordeauxPreset from './theme/bordeaux.js'
-import { useAuthStore } from './stores/auth.js'
-const app = createApp(App)
+import BordeauxPreset from '@/theme/bordeaux.js'
 
-app.use(createPinia())
+const app = createApp(App)
+const pinia = createPinia()
+
+// ✅ 1. Pinia en premier
+app.use(pinia)
+
+// ✅ 2. Ensuite les autres plugins
 app.use(PrimeVue, {
   theme: {
     preset: BordeauxPreset,
@@ -23,19 +25,9 @@ app.use(PrimeVue, {
 })
 app.use(ToastService)
 app.use(ConfirmationService)
-
-const pinia = createPinia()
-
-app.use(pinia)
-const auth = useAuthStore()
-
-// On vérifie l'authentification AVANT de monter le routeur
-// auth.checkAuth().finally(() => {
-// })
-
-const authStore = useAuthStore()
-if (authStore.user) {
-  authStore.fetchMe()
-}
 app.use(router)
+
+// ✅ 3. useAuthStore() APRÈS app.use(pinia)
+// Plus besoin ici, le router guard s'en charge via auth.init()
+
 app.mount('#app')

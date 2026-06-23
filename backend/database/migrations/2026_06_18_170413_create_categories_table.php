@@ -17,7 +17,8 @@ return new class extends Migration
             $blueprint->string('slug')->unique();
             $blueprint->text('description')->nullable();
             $blueprint->enum('status', ['active', 'inactive'])->default('active'); 
-            $blueprint->timestamps(); 
+            $blueprint->timestamps();
+            $blueprint->softDeletes();
         });
     }
 

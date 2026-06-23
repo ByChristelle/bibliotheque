@@ -82,21 +82,17 @@ export const useAuthStore = defineStore('auth', {
 },
 
 async fetchMe() {
-      try {
-        const response = await api.get('/me')
-        if (response.data && response.data.user) {
-          // Session valide : On met à jour les infos (rôle, avatar, etc.)
-          this.user = response.data.user
-          localStorage.setItem('user', JSON.stringify(response.data.user))
-        }
-      } catch (error) {
-        // Session expirée côté Laravel (Erreur 401, etc.) : On nettoie tout
-        this.user = null
-        localStorage.removeItem('user')
-        router.push('/login') // Redirection automatique vers le login
-      }
-    },
-
+  try {
+    const response = await api.get('/me')
+    if (response.data && response.data.user) {
+      this.user = response.data.user
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+    }
+  } catch (error) {
+    this.user = null
+    localStorage.removeItem('user')
+  }
+},
 async logout() {
   this.loading = true;
   try {

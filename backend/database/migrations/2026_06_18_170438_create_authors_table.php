@@ -19,7 +19,8 @@ return new class extends Migration
             $blueprint->string('nationality')->nullable(); 
             $blueprint->date('birth_date')->nullable(); 
             $blueprint->date('death_date')->nullable(); 
-            $blueprint->timestamps(); 
+            $blueprint->timestamps();
+            $blueprint->softDeletes();
         });
     }
 

@@ -1,25 +1,31 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import {useCategoriesStore} from '@/stores/categories'
+// import {loader2} from 'lucide-vue-next'
 
 const theme = useThemeStore()
+const categoriesStore = useCategoriesStore()
+const categories = computed(() => categoriesStore.categories)
 
-const categories = ref([
-  { id: 1, name: 'Sciences', count: 450 },
-  { id: 2, name: 'Littérature', count: 312 },
-  { id: 3, name: 'Droit', count: 280 },
-  { id: 4, name: 'Histoire', count: 198 },
-])
+onMounted(async()=>{
+  await categoriesStore.fetchCategories()
+})
+
 
 const showDialog = ref(false)
-const newCategory = ref('')
+const newCategory = ref({
+  name: '',
+  slug: '',
+  description: ''
+})
 
 function ajouter() {
   if (newCategory.value.trim()) {
-    categories.value.push({ id: Date.now(), name: newCategory.value.trim(), count: 0 })
+    categoriesStore.categories.push({ id: Date.now(), name: newCategory.value.trim(), count: 0 })
     newCategory.value = ''
     showDialog.value = false
   }
@@ -37,7 +43,6 @@ function ajouter() {
           Gérez les données de référence de la plateforme
         </p>
       </div>
-      <Button label="Ajouter une catégorie" icon="pi pi-plus" @click="showDialog = true" />
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -55,10 +60,40 @@ function ajouter() {
       </div>
     </div>
 
-    <Dialog v-model:visible="showDialog" header="Nouvelle catégorie" :modal="true" :style="{ width: '380px' }">
+   
+
+    <!-- Bouton flottant (FAB) en bas à droite -->
+<div class="fixed bottom-8 right-8 z-50 group">
+ <button
+  @click="showDialog = true"
+ class="w-16 h-16 rounded-full bg-gradient-to-br from-bordeaux-600 to-bordeaux-800 text-white shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center"
+  style="background: linear-gradient(to bottom right, #9f1239, #7f1d1d);"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+  </button>
+  <!-- Tooltip "Ajouter" -->
+  <div class="absolute bottom-full right-0 mb-2 px-3 py-1 rounded-lg shadow-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+       :class="theme.isDark ? 'bg-bordeaux-800 text-white' : 'bg-white text-gray-800'">
+    Ajouter
+  </div>
+</div>
+
+    
+
+   <Dialog v-model:visible="showDialog" header="Nouvelle catégorie" :modal="true" :style="{ width: '380px' }">
       <div class="flex flex-col gap-3">
         <label class="text-sm font-semibold">Nom de la catégorie</label>
-        <InputText v-model="newCategory" placeholder="ex: Philosophie" class="w-full" />
+        <InputText v-model="newCategory.name" placeholder="ex: Philosophie" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-3">
+        <label class="text-sm font-semibold">slug de la catégorie</label>
+        <InputText v-model="newCategory.slug" placeholder="ex: Philo" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-3">
+        <label class="text-sm font-semibold">description</label>
+        <InputText v-model="newCategory.description"  class="w-full" />
       </div>
       <template #footer>
         <Button label="Annuler" text @click="showDialog = false" />
@@ -66,4 +101,8 @@ function ajouter() {
       </template>
     </Dialog>
   </div>
+
+
+    
+  
 </template>

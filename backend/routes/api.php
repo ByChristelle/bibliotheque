@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\UserController; 
 
 // ── 1. Routes Publiques (Visiteurs) ──────────────────────────────────
@@ -22,6 +23,14 @@ Route::middleware('auth')->group(function () {
     // Gestion des utilisateurs
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    //pour archiver les users
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+
+    //Gestion des categories 
+        Route::get('/categories' , [CategorieController::class , 'index']);
+        Route::post('/categories' , [CategorieController::class , 'store']);
 });
 
 

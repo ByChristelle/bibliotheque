@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes; 
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory,SoftDeletes, Notifiable;
 
     /**
      * Les attributs transférables en masse.
@@ -25,6 +26,8 @@ class User extends Authenticatable
         'status',
         'last_login_at',
     ];
+   
+    protected $dates = ['deleted_at'];
 
     /**
      * Les attributs masqués pour la sérialisation (API).

@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth' // <-- Correction de l'import manquant
-
+import { useAuthStore } from '@/stores/auth' 
 import PublicLayout from '@/layouts/PublicLayout.vue'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 
@@ -76,20 +75,20 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  const auth = useAuthStore()
+// router.beforeEach((to, from, next) => {
+//   const auth = useAuthStore()
   
-  if(to.meta.requiresGuest){
-    next()
-    console.log(auth.user.role);
-  }
-  // const userRole= auth.user.role
-  // const rolee=auth.redirectUserByRole(userRole)
-  // router.push(rolee)
+//   if(to.meta.requiresGuest){
+//     next()
+//     console.log(auth.user.role);
+//   }
+//   const userRole= auth.user.role
+//   const rolee=auth.redirectUserByRole(userRole)
+//   router.push(rolee)
   
-  if (to.meta.requiresAuth && auth.user  ) {
-    next()
-  }
-})
+//   if (to.meta.requiresAuth && auth.user  ) {
+//     next()
+//   }
+// })
 
 export default router
