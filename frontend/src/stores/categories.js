@@ -30,13 +30,18 @@ actions:{
     
     },
 
+
+    //La création des categories
     async createCategorie (categorieData){
 
  this.loading=true
  this.error= null
  try {
     const response = await api.post('/categories' , categorieData)
-this.categorie.unshift(response.data.categorie)
+this.categorie.unshift({
+    ...response.data.category,
+    count:0
+})
 this.message= response.data.message
     return true
  } catch (error) {

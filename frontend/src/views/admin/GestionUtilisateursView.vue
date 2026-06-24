@@ -4,7 +4,7 @@ import { useThemeStore } from '@/stores/theme'
 import { useUsersStore } from '@/stores/users'
 import { useToast } from 'primevue'
 import { useConfirm } from 'primevue/useconfirm'
-// import { Loader2}  from 'lucide-vue-next';
+ import { Loader2}  from 'lucide-vue-next';
 
 
       
@@ -263,7 +263,7 @@ const archiveUser = async (user) => {
       theme.isDark ? 'bg-white/5 border-white/10' : 'bg-white/30 border-white/50']">
 
       <div v-if="loading" class="p-6 flex items-center justify-center">
-        <!-- <Loader2 class="w-10 h-10 text-primary-500 animate-spin mb-4" /> -->
+       <Loader2 class="w-10 h-10 text-primary-500 animate-spin mb-4" /> 
         <!-- <i class="pi pi-spin pi-spinner text-3xl text-bordeaux-700"></i> -->
         <span class="ml-3 text-sm">Chargement des utilisateurs...</span>
       </div>
