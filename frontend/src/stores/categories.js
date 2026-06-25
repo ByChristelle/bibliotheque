@@ -38,7 +38,7 @@ actions:{
  this.error= null
  try {
     const response = await api.post('/categories' , categorieData)
-this.categorie.unshift({
+this.categories.unshift({
     ...response.data.category,
     count:0
 })

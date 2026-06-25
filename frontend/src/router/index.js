@@ -75,25 +75,20 @@ const router = createRouter({
   ],
 })
 
-// router.beforeEach((to, from, next) => {
-//   const auth = useAuthStore()
-  
-//   if(to.meta.requiresGuest){
-//     next()
-//     console.log(auth.user.role);
-//   }
-//   const userRole= auth.user.role
-//   const rolee=auth.redirectUserByRole(userRole)
-//   router.push(rolee)
-  
-//   if (to.meta.requiresAuth && auth.user  ) {
-//     next()
-//   }
-//  })
 
-router.beforeEach((to) => {
+
+router.beforeEach(async(to) => {
   const auth = useAuthStore()
   const user = auth.user
+
+  if(auth.user){
+    try{
+      await auth.fetchUser()
+    }catch(error){
+      await auth.logout();
+      return { name: 'login' };
+    }
+  }
 
   // Route réservée aux invités (login, register)
   if (to.meta.requiresGuest && user) {

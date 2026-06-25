@@ -6,6 +6,11 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import {useCategoriesStore} from '@/stores/categories'
 import {Loader2} from 'lucide-vue-next'
+import { useToast } from 'primevue'
+
+const toast=useToast()
+
+
 
 const theme = useThemeStore()
 const categoriesStore = useCategoriesStore()
@@ -25,15 +30,44 @@ const newCategory = ref({
 
 async function ajouter() {
   if (newCategory.value.name.trim()) {
-    const success = await categoriesStore.createCategorie({
+
+    try {
+       const success = await categoriesStore.createCategorie({
       name: newCategory.value.name.trim(),
       slug: newCategory.value.slug.trim(),
       description: newCategory.value.description.trim()
+
+      
     })
+      
+
     if (success) {
+
       newCategory.value = { name: '', slug: '', description: '' }
       showDialog.value = false
+
+       toast.add({
+        severity: 'success',
+        summary: 'Categorie Crée',
+        detail: categoriesStore.message, //  le message récupéré depuis la réponse
+        // icon: 'pi pi-check',
+        life: 4000
+      })
     }
+    } catch (error) {
+
+       toast.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: "Une erreur est survenue lors de la modification.",
+      life: 4000
+    })
+    console.error(`erreur de modification` , error)
+      
+    }
+   
+
+    
   }
 }
 
@@ -54,8 +88,8 @@ async function ajouter() {
     </div>
 
      <!-- Loader pendant le chargement -->
-    <div class="flex items-center justify-center py-12" v-if="categoriesStore.loading">
-      <Loader2 class="w-10 h-10 text-primary-500 animate-spin" />
+    <div class="flex items-center justify-center z-50 py-12" v-if="categoriesStore.loading">
+      <Loader2 class="w-10 h-10 text-primary-500  animate-spin " />
   <span class="ml-3 text-sm">Chargement des Catégories...</span>
 
     </div>
@@ -99,7 +133,7 @@ async function ajouter() {
 
     
 
-   <Dialog v-model:visible="showDialog" header="Nouvelle catégorie" :modal="true" :style="{ width: '380px' }">
+   <Dialog v-model:visible="showDialog" header="Nouvelle catégorie" :modal="true" :style="{ width: '380px' } " class="z-10">
       <div class="flex flex-col gap-3">
         <label class="text-sm font-semibold">Nom de la catégorie</label>
         <InputText v-model="newCategory.name" placeholder="ex: Philosophie" class="w-full" />
@@ -123,3 +157,9 @@ async function ajouter() {
     
   
 </template>
+
+<style>
+.ttt{
+  z-index: 50;
+}
+</style>

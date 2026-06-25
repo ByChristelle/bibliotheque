@@ -8,10 +8,32 @@ export const useAuthStore = defineStore('auth', {
     message:null,
     loading: false,
     errors: {} ,
+    pollingInterval:null,
     
   }),
 
   actions: {
+
+
+    
+startStatusPolling() {
+  // Vérifie le statut toutes les 30 secondes (30000ms)
+  this.pollingInterval = setInterval(async () => {
+    if (this.user) {
+      await this.fetchUser();
+    } else {
+      this.stopStatusPolling();
+    }
+  }, 30000);
+},
+
+stopStatusPolling() {
+  if (this.pollingInterval) {
+    clearInterval(this.pollingInterval);
+    this.pollingInterval = null;
+  }
+},
+
     //pour inscription 
     async register(formData) {
       this.loading = true;
@@ -55,7 +77,7 @@ export const useAuthStore = defineStore('auth', {
     
     // 3. Stocker les infos de l'utilisateur connecté
     this.user = response.data.user;
-    
+     this.startStatusPolling(); 
     return true;
   } catch (error) {
     if (error.response && error.response.status === 422) {
@@ -82,31 +104,27 @@ export const useAuthStore = defineStore('auth', {
 
 },
 
-// async fetchMe() {
-//   try {
-//     const response = await api.get('/me')
-//     if (response.data && response.data.user) {
-//       this.user = response.data.user
-//       localStorage.setItem('user', JSON.stringify(response.data.user))
-//     }
-//   } catch (error) {
-//     this.user = null
-//     localStorage.removeItem('user')
-//   }
-// },
 
 
 // Dans auth.js — ajouter une action
 async fetchUser() {
   try {
-    const response = await api.get('/me')
-    this.user = response.data.user
+      const response = await api.get('/me');
+    const user = response.data.user;
+    
+    // VÉRIFICATION : Si le statut est 'suspended', déconnecter immédiatement
+    if (user && user.status === 'suspended') {
+      this.message = 'Votre compte a été suspendu. Veuillez contacter l\'administrateur.';
+      await this.logout();
+      return;
+    }
   } catch {
     this.user = null
   }
 }
 ,
 async logout() {
+  this.stopStatusPolling();
   this.loading = true;
   try {
     // 1. Appeler le serveur pour détruire la session Laravel
@@ -123,16 +141,6 @@ async logout() {
   }
 },
 
-async checkAuth() {
-  try {
-    const response = await api.get('/user');
-    this.user = response.data.user; // On réhydrate le store avec l'utilisateur
-  } catch (error) {
-    this.user = null; // Si le cookie n'est plus valide ou expiré
-  }
-}
-
-  },
-
   
+}
 });

@@ -21,13 +21,14 @@ class AuthController extends Controller
         $validated = $request->validated();
 
         // 2. Créer l'utilisateur en base de données
-        // Le rôle ('user') et le statut ('active') sont gérés par les valeurs par défaut de votre migration
+        // Le rôle ('user') est géré par la valeur par défaut de votre migration
         $user = User::create([
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
+            'status'=>'inactive',
         ]);
 
         // 3. Connecter automatiquement l'utilisateur (Création de la session Sanctum)
@@ -55,6 +56,19 @@ class AuthController extends Controller
 
     // 3. Récupérer l'utilisateur connecté
     $user = Auth::user();
+
+    if($user->status === 'suspended'){
+        // Déconnecter immédiatement (car Auth::attempt l'a connecté)
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Renvoyer une erreur claire
+        throw ValidationException::withMessages([
+            'email' => ['Votre compte a été suspendu. Veuillez contacter l\'administrateur.'],
+        ]);
+
+    }
 
     // 4. Retourner l'utilisateur au Frontend
     return response()->json([

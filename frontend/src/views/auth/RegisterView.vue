@@ -28,7 +28,7 @@ const submit = async () => {
     const success = await auth.register(form.value)
     if (success) {
       toast.add({ severity: 'success', summary: 'Inscription réussie', detail: auth.message, life: 4000 })
-      router.push('/connexion')
+      router.push('/espace/dashboard')
     }
   } catch (error) {
     toast.add({ severity: 'error', summary: 'Erreur', detail: "Une erreur est survenue lors de l'inscription.", life: 4000 })
