@@ -7,11 +7,13 @@ import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
 import BordeauxPreset from '@/theme/bordeaux.js'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import { useAuthStore } from './stores/auth'
+
 
 const app = createApp(App)
 const pinia = createPinia()
-
-// ✅ 1. Pinia en premier
+pinia.use(piniaPluginPersistedstate)
 app.use(pinia)
 
 // ✅ 2. Ensuite les autres plugins
@@ -27,7 +29,6 @@ app.use(ToastService)
 app.use(ConfirmationService)
 app.use(router)
 
-// ✅ 3. useAuthStore() APRÈS app.use(pinia)
-// Plus besoin ici, le router guard s'en charge via auth.init()
-
+const auth= useAuthStore()
+await auth.fetchUser()
 app.mount('#app')

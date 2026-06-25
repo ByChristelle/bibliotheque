@@ -89,6 +89,28 @@ const router = createRouter({
 //   if (to.meta.requiresAuth && auth.user  ) {
 //     next()
 //   }
-// })
+//  })
+
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  const user = auth.user
+
+  // Route réservée aux invités (login, register)
+  if (to.meta.requiresGuest && user) {
+    return auth.redirectUserByRole(user.role)
+  }
+
+  // Route protégée — pas connecté
+  if (to.meta.requiresAuth && !user) {
+    return { name: 'login' }
+  }
+
+  // Route protégée — connecté mais mauvais rôle
+  if (to.meta.requiresAuth && to.meta.allowedRoles && !to.meta.allowedRoles.includes(user.role)) {
+    return auth.redirectUserByRole(user.role)
+  }
+
+  return true
+})
 
 export default router

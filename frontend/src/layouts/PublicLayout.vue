@@ -1,55 +1,41 @@
 <script setup>
 import { useThemeStore } from '@/stores/theme'
 import { useRouter } from 'vue-router'
-import Button from 'primevue/button'
 
 const theme = useThemeStore()
 const router = useRouter()
+
+const links = [
+  { label: 'Accueil', to: '/' },
+  { label: 'Catalogue', to: '/catalogue' },
+]
 </script>
 
 <template>
-  <div :class="['min-h-screen relative transition-colors duration-300',
-    theme.isDark
-      ? 'bg-gradient-to-br from-bordeaux-950 via-bordeaux-900 to-bordeaux-950'
-      : 'bg-white']">
-
-    <!-- Orbs décoratifs — light: bordeaux discret, dark: bordeaux intense -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <div class="absolute -top-40 -right-24 w-[500px] h-[500px] rounded-full"
-           :class="theme.isDark ? 'opacity-30 bg-bordeaux-700' : 'opacity-10 bg-bordeaux-700'"
-           style="filter: blur(100px)"></div>
-      <div class="absolute -bottom-20 -left-20 w-80 h-80 rounded-full"
-           :class="theme.isDark ? 'opacity-20 bg-bordeaux-900' : 'opacity-8 bg-bordeaux-600'"
-           style="filter: blur(80px)"></div>
-    </div>
+  <div :class="['min-h-screen transition-colors duration-300', theme.isDark ? 'bg-bordeaux-950 text-white' : 'bg-[#F8F6F6] text-[#2D2D2D]']">
 
     <!-- Navbar -->
-    <nav :class="['sticky top-0 z-50 border-b backdrop-blur-xl',
-      theme.isDark
-        ? 'bg-black/20 border-white/10'
-        : 'bg-white/90 border-gray-100']">
-      <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-6">
+    <nav :class="['sticky top-0 z-50 border-b transition-all duration-300',
+      theme.isDark ? 'bg-bordeaux-950/90 border-white/10 backdrop-blur-xl' : 'bg-white border-[#ECECEC] shadow-sm']">
+      <div class="max-w-7xl mx-auto px-6 h-16 flex items-center gap-8">
+
         <!-- Logo -->
-        <div class="flex items-center gap-2 cursor-pointer select-none" @click="router.push('/')">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-bordeaux-700 to-bordeaux-900">
+        <div class="flex items-center gap-2.5 cursor-pointer select-none shrink-0" @click="router.push('/')">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-[#7A0026]">
             <i class="pi pi-book text-white text-sm"></i>
           </div>
-          <span :class="['font-bold text-lg', theme.isDark ? 'text-bordeaux-200' : 'text-bordeaux-800']">
+          <span :class="['font-bold text-base', theme.isDark ? 'text-white' : 'text-[#7A0026]']">
             BiblioConnect
           </span>
         </div>
 
         <!-- Liens -->
-        <div class="flex gap-6 flex-1">
+        <div class="flex gap-1 flex-1">
           <RouterLink
-            v-for="link in [{ label: 'Accueil', to: '/' }, { label: 'Catalogue', to: '/catalogue' }]"
-            :key="link.to"
-            :to="link.to"
-            :class="['text-sm font-medium pb-0.5 border-b-2 transition-colors no-underline',
-              theme.isDark
-                ? 'text-bordeaux-300 border-transparent hover:text-bordeaux-200 hover:border-bordeaux-400'
-                : 'text-gray-600 border-transparent hover:text-bordeaux-700 hover:border-bordeaux-600']"
-            activeClass="!border-bordeaux-600 !text-bordeaux-700"
+            v-for="link in links" :key="link.to" :to="link.to"
+            :class="['px-3 py-1.5 rounded-lg text-sm font-medium no-underline transition-all duration-200',
+              theme.isDark ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-[#777] hover:text-[#7A0026] hover:bg-[#E8D6DB]']"
+            activeClass="!text-[#7A0026] !bg-[#E8D6DB]"
           >
             {{ link.label }}
           </RouterLink>
@@ -57,19 +43,31 @@ const router = useRouter()
 
         <!-- Actions -->
         <div class="flex items-center gap-2">
-          <Button
-            :icon="theme.isDark ? 'pi pi-sun' : 'pi pi-moon'"
-            rounded text size="small"
+          <button
+            :class="['w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200',
+              theme.isDark ? 'text-white/60 hover:bg-white/10 hover:text-white' : 'text-[#777] hover:bg-[#ECECEC] hover:text-[#2D2D2D]']"
             @click="theme.toggle()"
-          />
-          <Button label="Connexion" outlined size="small" @click="router.push('/connexion')" />
-          <Button label="Inscription" size="small" @click="router.push('/inscription')" />
+          >
+            <i :class="theme.isDark ? 'pi pi-sun text-sm' : 'pi pi-moon text-sm'"></i>
+          </button>
+          <button
+            :class="['px-4 py-1.5 rounded-xl text-sm font-medium border transition-all duration-200',
+              theme.isDark ? 'border-white/20 text-white hover:bg-white/10' : 'border-[#7A0026] text-[#7A0026] hover:bg-[#E8D6DB]']"
+            @click="router.push('/connexion')"
+          >
+            Connexion
+          </button>
+          <button
+            class="px-4 py-1.5 rounded-xl text-sm font-medium bg-[#7A0026] text-white hover:bg-[#5e001c] transition-all duration-200 shadow-sm hover:shadow-md"
+            @click="router.push('/inscription')"
+          >
+            Inscription
+          </button>
         </div>
       </div>
     </nav>
 
-    <!-- Contenu -->
-    <main class="relative z-10">
+    <main>
       <RouterView />
     </main>
   </div>

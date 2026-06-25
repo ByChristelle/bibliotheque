@@ -1,23 +1,253 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
-
 @theme {
-  --color-bordeaux-50: #fdf2f4;
+  /* ── Palette principale ── */
+  --color-primary:        #7A0026;
+  --color-primary-hover:  #5e001c;
+  --color-secondary:      #E8D6DB;
+  --color-accent:         #B78493;
+
+  --color-bg:             #F8F6F6;
+  --color-card:           #FFFFFF;
+  --color-border:         #ECECEC;
+
+  --color-text:           #2D2D2D;
+  --color-text-muted:     #777777;
+
+  /* ── Bordeaux scale ── */
+  --color-bordeaux-50:  #fdf2f4;
   --color-bordeaux-100: #fce7eb;
-  --color-bordeaux-200: #f9d0d8;
-  --color-bordeaux-300: #f4a8b8;
-  --color-bordeaux-400: #ec7590;
-  --color-bordeaux-500: #e04570;
-  --color-bordeaux-600: #cc2755;
-  --color-bordeaux-700: #ac1a43;
-  --color-bordeaux-800: #8b1a3a;
-  --color-bordeaux-900: #6b0f2a;
-  --color-bordeaux-950: #4a0a1e;
+  --color-bordeaux-200: #E8D6DB;
+  --color-bordeaux-300: #B78493;
+  --color-bordeaux-400: #a05070;
+  --color-bordeaux-500: #8a2040;
+  --color-bordeaux-600: #7A0026;
+  --color-bordeaux-700: #5e001c;
+  --color-bordeaux-800: #470015;
+  --color-bordeaux-900: #30000e;
+  --color-bordeaux-950: #1a0008;
 
   --font-sans: 'Inter', sans-serif;
 }
 
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
 body {
   font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
 }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-secondary); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+/* ══════════════════════════════════════════
+   PRIMEVUE — OVERRIDE GLOBAL
+══════════════════════════════════════════ */
+
+/* ── Inputs ── */
+.p-inputtext {
+  border: 1.5px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  padding: 0.6rem 0.9rem !important;
+  font-size: 0.875rem !important;
+  color: var(--color-text) !important;
+  background: var(--color-card) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.p-inputtext:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(122, 0, 38, 0.1) !important;
+  outline: none !important;
+}
+
+/* ── Select ── */
+.p-select {
+  border: 1.5px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  background: var(--color-card) !important;
+}
+.p-select:focus-within {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(122, 0, 38, 0.1) !important;
+}
+.p-select-overlay {
+  border-radius: 12px !important;
+  border: 1.5px solid var(--color-border) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10) !important;
+}
+.p-select-option:hover,
+.p-select-option.p-focus {
+  background: var(--color-secondary) !important;
+  color: var(--color-primary) !important;
+}
+.p-select-option.p-selected {
+  background: var(--color-primary) !important;
+  color: white !important;
+}
+
+/* ── Password ── */
+.p-password input {
+  border: 1.5px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  padding: 0.6rem 0.9rem !important;
+  width: 100% !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.p-password input:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(122, 0, 38, 0.1) !important;
+  outline: none !important;
+}
+
+/* ── Buttons ── */
+.p-button {
+  border-radius: 12px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  padding: 0.55rem 1.1rem !important;
+}
+/* Bouton primaire */
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary) {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: white !important;
+}
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):hover {
+  background: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  box-shadow: 0 4px 14px rgba(122, 0, 38, 0.25) !important;
+}
+/* Bouton outlined */
+.p-button.p-button-outlined {
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background: transparent !important;
+}
+.p-button.p-button-outlined:hover {
+  background: var(--color-secondary) !important;
+}
+/* Bouton texte */
+.p-button.p-button-text {
+  color: var(--color-primary) !important;
+}
+.p-button.p-button-text:hover {
+  background: var(--color-secondary) !important;
+}
+/* Bouton danger */
+.p-button.p-button-danger:not(.p-button-text):not(.p-button-outlined) {
+  background: #c0392b !important;
+  border-color: #c0392b !important;
+}
+.p-button.p-button-danger.p-button-text {
+  color: #c0392b !important;
+}
+.p-button.p-button-danger.p-button-outlined {
+  border-color: #c0392b !important;
+  color: #c0392b !important;
+}
+
+/* ── DataTable ── */
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--color-bg) !important;
+  color: var(--color-text-muted) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1.5px solid var(--color-border) !important;
+  padding: 0.85rem 1rem !important;
+}
+.p-datatable .p-datatable-tbody > tr {
+  background: var(--color-card) !important;
+  transition: background 0.15s ease !important;
+}
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--color-secondary) !important;
+}
+.p-datatable .p-datatable-tbody > tr > td {
+  border-bottom: 1px solid var(--color-border) !important;
+  padding: 0.85rem 1rem !important;
+  font-size: 0.875rem !important;
+  color: var(--color-text) !important;
+}
+.p-datatable .p-datatable-tbody > tr.p-row-odd {
+  background: #fafafa !important;
+}
+.p-datatable .p-datatable-tbody > tr.p-row-odd:hover {
+  background: var(--color-secondary) !important;
+}
+
+/* ── Tags / Badges ── */
+.p-tag {
+  border-radius: 8px !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  padding: 0.2rem 0.6rem !important;
+}
+.p-tag.p-tag-success { background: #e6f4ea !important; color: #276221 !important; }
+.p-tag.p-tag-danger  { background: #fdecea !important; color: #9b2422 !important; }
+.p-tag.p-tag-warn    { background: #fff4e0 !important; color: #8a5c00 !important; }
+.p-tag.p-tag-info    { background: #e8f0fe !important; color: #1a56a0 !important; }
+.p-tag.p-tag-secondary { background: var(--color-secondary) !important; color: var(--color-primary) !important; }
+
+/* ── Modals / Dialogs ── */
+.p-dialog-mask {
+  background: rgba(45, 0, 14, 0.18) !important;
+  backdrop-filter: blur(4px) !important;
+}
+.p-dialog {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 64px rgba(122, 0, 38, 0.10), 0 4px 16px rgba(0,0,0,0.06) !important;
+}
+.p-dialog .p-dialog-header {
+  background: transparent !important;
+  border-bottom: 1.5px solid var(--color-border) !important;
+  border-radius: 20px 20px 0 0 !important;
+  padding: 1.25rem 1.5rem 1rem !important;
+}
+.p-dialog .p-dialog-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: var(--color-primary) !important;
+}
+.p-dialog .p-dialog-content {
+  background: transparent !important;
+  padding: 1.25rem 1.5rem !important;
+}
+.p-dialog .p-dialog-footer {
+  background: transparent !important;
+  border-top: 1.5px solid var(--color-border) !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 0 0 20px 20px !important;
+}
+
+/* ── Toast ── */
+.p-toast .p-toast-message {
+  border-radius: 14px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10) !important;
+}
+
+/* ── Dark mode overrides ── */
+.dark .p-dialog {
+  background: rgba(26, 0, 8, 0.88) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.dark .p-dialog .p-dialog-title { color: #E8D6DB !important; }
+.dark .p-dialog .p-dialog-header { border-bottom-color: rgba(255,255,255,0.07) !important; }
+.dark .p-dialog .p-dialog-footer { border-top-color: rgba(255,255,255,0.07) !important; }
+.dark .p-inputtext { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.12) !important; color: #f0e8ea !important; }
+.dark .p-datatable .p-datatable-thead > tr > th { background: rgba(255,255,255,0.04) !important; }
+.dark .p-datatable .p-datatable-tbody > tr { background: rgba(255,255,255,0.03) !important; }
+.dark .p-datatable .p-datatable-tbody > tr:hover { background: rgba(122,0,38,0.2) !important; }

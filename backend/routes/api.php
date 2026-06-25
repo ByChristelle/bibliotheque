@@ -13,7 +13,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 
 // ── 2. Routes Privées (Utilisateurs connectés via Session/Cookie) ────
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     
     // Déconnexion propre
     Route::post('/logout', [AuthController::class, 'logout']);

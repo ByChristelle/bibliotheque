@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import api from '../services/axios';
 
 export const useAuthStore = defineStore('auth', {
+    persist:true,
   state: () => ({
     user: null,
     message:null,
@@ -81,18 +82,30 @@ export const useAuthStore = defineStore('auth', {
 
 },
 
-async fetchMe() {
+// async fetchMe() {
+//   try {
+//     const response = await api.get('/me')
+//     if (response.data && response.data.user) {
+//       this.user = response.data.user
+//       localStorage.setItem('user', JSON.stringify(response.data.user))
+//     }
+//   } catch (error) {
+//     this.user = null
+//     localStorage.removeItem('user')
+//   }
+// },
+
+
+// Dans auth.js — ajouter une action
+async fetchUser() {
   try {
     const response = await api.get('/me')
-    if (response.data && response.data.user) {
-      this.user = response.data.user
-      localStorage.setItem('user', JSON.stringify(response.data.user))
-    }
-  } catch (error) {
+    this.user = response.data.user
+  } catch {
     this.user = null
-    localStorage.removeItem('user')
   }
-},
+}
+,
 async logout() {
   this.loading = true;
   try {
