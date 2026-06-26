@@ -16,14 +16,19 @@ const menus = {
     { label: 'Tableau de bord',  icon: 'pi pi-home',        to: '/espace/dashboard' },
     { label: 'Mes demandes',     icon: 'pi pi-list',         to: '/espace/mes-demandes' },
     { label: 'Nouvelle demande', icon: 'pi pi-plus-circle',  to: '/espace/nouvelle-demande' },
+    { label: 'Références',         icon: 'pi pi-book',    to: '/admin/references' },
+    
   ],
   responsable_demande: [
     { label: 'Tableau de bord',    icon: 'pi pi-home',   to: '/responsable/dashboard' },
     { label: 'Demandes affectées', icon: 'pi pi-inbox',  to: '/responsable/demandes' },
+    { label: 'Références',         icon: 'pi pi-book',    to: '/admin/references' },
   ],
   responsable_rh: [
     { label: 'Tableau de bord', icon: 'pi pi-home',  to: '/rh/dashboard' },
     { label: 'Utilisateurs',    icon: 'pi pi-users', to: '/rh/utilisateurs' },
+    { label: 'Références',         icon: 'pi pi-book',    to: '/admin/references' },
+
   ],
   admin: [
     { label: 'Tableau de bord',    icon: 'pi pi-home',    to: '/admin/dashboard' },

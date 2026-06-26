@@ -72,8 +72,29 @@ this.message= response.data.message
   } finally {
     this.loading = false
   }
-}
+},
 
+
+//Pour les archives categories
+async  deleteCategorie(categorieId) {
+    this.loading=true
+
+    try {
+          const response = await api.delete(`/categories/${categorieId}`)
+                this.categories = this.categories.filter(cat => cat.id !== categorieId)
+                this.message = response.data.message
+                return true
+        
+    } catch (error) {
+        console.error("Erreur lors de l'archivage", error)
+
+        this.error = error.response?.data?.message || "Erreur d'archivage"
+    throw error // <-- Important : renvoie l'erreur pour que la vue puisse l'attraper
+        return false
+      } finally {
+        this.loading = false
+      }
+}
 }
 
 })

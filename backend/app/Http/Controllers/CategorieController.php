@@ -67,4 +67,16 @@ class CategorieController extends Controller
     ]);
 }
 
+
+public function destroy (int $id){
+    $categorie = Category::findOrFail($id);
+
+    $categorie->delete();
+
+    return response()->json([
+        'message' => 'utilisateur archivé avec succès .',
+        'id'=>$id
+    ], 200);
+}
+
 }

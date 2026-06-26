@@ -27,12 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update']);
     //pour archiver les users
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
-
-
+    
+    
     //Gestion des categories 
-        Route::get('/categories' , [CategorieController::class , 'index']);
-        Route::post('/categories' , [CategorieController::class , 'store']);
-        Route::put('/categories/{id}', [CategorieController::class, 'update']);
+    Route::get('/categories' , [CategorieController::class , 'index']);
+    Route::post('/categories' , [CategorieController::class , 'store']);
+    Route::put('/categories/{id}', [CategorieController::class, 'update']);
+    Route::delete('/categories/{id}', [CategorieController::class, 'destroy']);
 
 
         //Gestion des references 

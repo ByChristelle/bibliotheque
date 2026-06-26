@@ -91,6 +91,44 @@ function voirDetail(cat) {
   showDetailDialog.value = true
 }
 
+//Pour les archives des catégories
+const  archiveCategorie=async(cat)=> {
+
+  // Vérification frontend d'abord (pour UX)
+  if (cat.count > 0) {
+    toast.add({
+      severity: 'error',
+      summary: 'Impossible d\'archiver',
+      detail: `Cette catégorie contient ${cat.count} référence(s).`,
+      life: 4000
+    })
+    return
+  }
+  try {
+    const success = await categoriesStore.deleteCategorie(cat.id)
+    if(success){
+       toast.add({
+        severity: 'success',
+        summary: 'Archive réussie',
+        detail: categoriesStore.message, //  le message récupéré depuis la réponse
+        // icon: 'pi pi-check',
+        life: 4000
+      })
+
+    }
+    
+  } catch (error) {
+     toast.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: "Une erreur est survenue lors de l'archive.",
+      life: 4000
+    })
+    console.error(`erreur d'archive` , error)
+  }
+    
+  }
+
 
 
 
@@ -127,7 +165,7 @@ function voirDetail(cat) {
         </div>
         <div class="flex gap-1">
           <!-- Voir détail -->
-          <button title="Voir le détail"
+          <button title="Voir le détail" @click="voirDetail(cat)"
             class="w-8 h-8 rounded-lg flex items-center justify-center text-[#94A3B8] hover:text-[#60a5fa] hover:bg-[#60a5fa]/10 transition-all duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
@@ -142,7 +180,10 @@ function voirDetail(cat) {
             </svg>
           </button>
           <!-- Archiver -->
-          <button title="Archiver" @click="voirDetail(cat)"
+          <button title="Archiver" 
+        type="button"
+        @click="archiveCategorie(cat)" 
+
             class="w-8 h-8 rounded-lg flex items-center justify-center text-[#94A3B8] hover:text-[#f87171] hover:bg-[#f87171]/10 transition-all duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
@@ -234,6 +275,10 @@ function voirDetail(cat) {
     <div class="flex flex-col gap-1">
       <span class="text-xs font-semibold uppercase tracking-widest text-[#94A3B8]">Description</span>
       <span class="text-sm">{{ selectedCategory.description || '—' }}</span>
+    </div>
+    <div class="flex flex-col gap-1">
+      <span class="text-xs font-semibold uppercase tracking-widest text-[#94A3B8]">Status</span>
+      <span class="text-sm">{{ selectedCategory.status }}</span>
     </div>
 
     <div class="flex flex-col gap-1">
