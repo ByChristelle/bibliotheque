@@ -32,6 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
     //Gestion des categories 
         Route::get('/categories' , [CategorieController::class , 'index']);
         Route::post('/categories' , [CategorieController::class , 'store']);
+        Route::put('/categories/{id}', [CategorieController::class, 'update']);
+
 
         //Gestion des references 
          Route::get('/references' , [ReferenceController::class , 'index']);

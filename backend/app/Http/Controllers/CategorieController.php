@@ -43,4 +43,28 @@ class CategorieController extends Controller
             'category' => $category
         ], 201);
     }
+
+    //Pour la modification 
+    public function update(Request $request, $id)
+{
+    $category = Category::findOrFail($id);
+
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255|unique:categories,name,' . $id,
+        'slug' => 'required|string|max:255|unique:categories,slug,' . $id,
+        'description' => 'nullable|string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
+
+    $category->update($request->only('name', 'slug', 'description'));
+
+    return response()->json([
+        'message' => 'Catégorie modifiée avec succès',
+        'category' => $category
+    ]);
+}
+
 }

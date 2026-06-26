@@ -50,7 +50,30 @@ this.message= response.data.message
  }finally{
     this.loading = false
  }
+    },
+
+    //fonction de modification
+    async updateCategorie(id, data) {
+  this.loading = true
+  this.error = null
+  try {
+    const response = await api.put(`/categories/${id}`, data)
+    const index = this.categories.findIndex(c => c.id === id)
+    if (index !== -1) {
+      this.categories[index] = { ...this.categories[index], ...response.data.category }
     }
+    this.message = response.data.message
+    return true
+  } catch (error) {
+    console.error('Erreur modification catégorie', error)
+    console.log(error.response?.status, error.response?.data)
+
+    return false
+  } finally {
+    this.loading = false
+  }
+}
+
 }
 
 })
