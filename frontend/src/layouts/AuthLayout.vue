@@ -17,17 +17,23 @@ const menus = {
     { label: 'Mes demandes',     icon: 'pi pi-list',         to: '/espace/mes-demandes' },
     { label: 'Nouvelle demande', icon: 'pi pi-plus-circle',  to: '/espace/nouvelle-demande' },
     { label: 'Références',         icon: 'pi pi-book',    to: '/admin/references' },
+    { label: 'Profil',             icon: 'pi pi-user',    to: '/admin/profil' },
+
     
   ],
   responsable_demande: [
     { label: 'Tableau de bord',    icon: 'pi pi-home',   to: '/responsable/dashboard' },
     { label: 'Demandes affectées', icon: 'pi pi-inbox',  to: '/responsable/demandes' },
     { label: 'Références',         icon: 'pi pi-book',    to: '/admin/references' },
+    { label: 'Profil',             icon: 'pi pi-user',    to: '/admin/profil' },
+
   ],
   responsable_rh: [
     { label: 'Tableau de bord', icon: 'pi pi-home',  to: '/rh/dashboard' },
     { label: 'Utilisateurs',    icon: 'pi pi-users', to: '/rh/utilisateurs' },
     { label: 'Références',         icon: 'pi pi-book',    to: '/admin/references' },
+    { label: 'Profil',             icon: 'pi pi-user',    to: '/admin/profil' },
+
 
   ],
   admin: [
@@ -37,6 +43,9 @@ const menus = {
     { label: 'Utilisateurs',       icon: 'pi pi-users',   to: '/admin/utilisateurs' },
     { label: 'Catégories',         icon: 'pi pi-tags',    to: '/admin/categories' },
     { label: "Journaux d'activité",icon: 'pi pi-history', to: '/admin/logs' },
+    { label: 'Affectations',       icon: 'pi pi-people',  to: '/admin/affectations' },
+    { label: 'Archives',           icon: 'pi pi-archive', to: '/admin/archives' },
+    { label: 'Profil',             icon: 'pi pi-user',    to: '/admin/profil' },
   ],
 }
 
@@ -99,6 +108,9 @@ const userInitials= computed(() => {
               <path v-else-if="item.icon === 'pi pi-book'" stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
               <path v-else-if="item.icon === 'pi pi-tags'" stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.947 1.947 0 0 0 2.754 0l4.318-4.318a1.947 1.947 0 0 0 0-2.754L11.16 3.659A2.25 2.25 0 0 0 9.568 3Z M6 6h.008v.008H6V6Z" />
               <path v-else-if="item.icon === 'pi pi-history'" stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              <path v-else-if="item.icon === 'pi pi-user'" stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+              <path v-else-if="item.icon === 'pi pi-people'" stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M6.75 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Z" />
+              <path v-else-if="item.icon === 'pi pi-archive'" stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
               <path v-else stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>            <span v-if="sidebarOpen" class="truncate">{{ item.label }}</span>
           </a>

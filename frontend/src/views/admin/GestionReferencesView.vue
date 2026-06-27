@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useThemeStore } from '@/stores/theme'
+import { useAuthStore } from '@/stores/auth'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
@@ -11,8 +12,10 @@ import {Loader2} from 'lucide-vue-next'
 import { useReferenceStore } from '@/stores/reference'
 
 const theme = useThemeStore()
+const auth = useAuthStore()
 const search = ref('')
 const referenceStore = useReferenceStore()
+const isAdmin = computed(() => auth.user?.role === 'admin')
 
 onMounted(async()=>{
   await referenceStore.fetchReferences()
@@ -40,19 +43,7 @@ const publishers = ref([])
 const authors = ref([])
 const selectedAuthors = ref([])
 
-// const loadSelectOptions = async () => {
-//   try {
-//     // Tu devras créer ces endpoints et ces fonctions dans les stores
-//     const catRes = await api.get('/categories')
-//     categories.value = catRes.data.categories
-//     const pubRes = await api.get('/publishers')
-//     publishers.value = pubRes.data.publishers
-//     const authRes = await api.get('/authors')
-//     authors.value = authRes.data.authors
-//   } catch (error) {
-//     console.error("Erreur lors du chargement des options", error)
-//   }
-// }
+
 
 // Gérer l'upload de l'image
 const onImageUpload = (event) => {
@@ -168,7 +159,7 @@ const getStatusLabel = (status) => {
               <Tag :value="getStatusLabel(data.status)" :severity="getStatusSeverity(data.status)" />
             </template>
           </Column>
-          <Column header="Actions">
+          <Column header="Actions" v-if="isAdmin">
             <template #body>
               <div class="flex gap-2">
                 <Button icon="pi pi-pencil" text rounded size="small" />
@@ -181,7 +172,7 @@ const getStatusLabel = (status) => {
     </div>
 
   <!-- Bouton flottant (FAB) en bas à droite -->
-<div class="fixed bottom-8 right-8 z-50 group">
+<div class="fixed bottom-8 right-8 z-50 group" v-if="isAdmin">
  <button
   @click="showDialog = true"
   class="w-16 h-16 rounded-full bg-gradient-to-br from-bordeaux-600 to-bordeaux-800 text-white shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center"

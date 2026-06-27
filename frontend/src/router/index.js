@@ -55,7 +55,25 @@ const router = createRouter({
       ],
     },
 
-    // ── Admin ────────────────────────────────────────────
+    // ── Références (tous les rôles) ─────────────────────
+    {
+      path: '/admin/references',
+      component: AuthLayout,
+      meta: { requiresAuth: true, allowedRoles: ['admin', 'responsable_demande', 'responsable_rh', 'user'] },
+      children: [
+        { path: '', name: 'admin-references', component: () => import('@/views/admin/GestionReferencesView.vue'), meta: { title: 'Références' } },
+      ],
+    },
+    // ── Références (tous les rôles) ─────────────────────
+    {
+      path: '/admin/profil',
+      component: AuthLayout,
+      meta: { requiresAuth: true, allowedRoles: ['admin', 'responsable_demande', 'responsable_rh', 'user'] },
+      children: [
+        { path: '', name: 'admin-profil', component: () => import('@/views/admin/ProfilView.vue'), meta: { title: 'Profil' } },
+      ],
+    },
+    // ── Admin (autres pages) ───────────────────────────
     {
       path: '/admin',
       component: AuthLayout,
@@ -63,10 +81,11 @@ const router = createRouter({
       children: [
         { path: 'dashboard', name: 'admin-dashboard', component: () => import('@/views/admin/DashboardAdminView.vue'), meta: { title: 'Tableau de bord' } },
         { path: 'demandes', name: 'admin-demandes', component: () => import('@/views/admin/GestionDemandesView.vue'), meta: { title: 'Demandes' } },
-        { path: 'references', name: 'admin-references', component: () => import('@/views/admin/GestionReferencesView.vue'), meta: { title: 'Références' } },
         { path: 'utilisateurs', name: 'admin-utilisateurs', component: () => import('@/views/admin/GestionUtilisateursView.vue'), meta: { title: 'Utilisateurs' } },
         { path: 'categories', name: 'admin-categories', component: () => import('@/views/admin/GestionCategoriesView.vue'), meta: { title: 'Catégories' } },
         { path: 'logs', name: 'admin-logs', component: () => import('@/views/admin/LogsActiviteView.vue'), meta: { title: "Journaux d'activité" } },
+        { path: 'affectations', name: 'admin-affectations', component: () => import('@/views/admin/AffectationView.vue'), meta: { title: 'Affectations' } },
+        { path: 'archives', name: 'admin-archives', component: () => import('@/views/admin/ArchivesView.vue'), meta: { title: 'Archives' } },
       ],
     },
 
