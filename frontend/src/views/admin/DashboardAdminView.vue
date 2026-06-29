@@ -1,22 +1,23 @@
 <script setup>
+import { onMounted, computed } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { useRouter } from 'vue-router'
-import Button from 'primevue/button'
+import { useDepositRequestsStore } from '@/stores/depositRequests'
 
 const theme = useThemeStore()
 const router = useRouter()
+const depositStore = useDepositRequestsStore()
 
-const stats = [
-  { label: 'Références publiées', value: 2400, icon: 'pi pi-book', color: 'text-bordeaux-600' },
-  { label: 'Demandes en cours', value: 14, icon: 'pi pi-inbox', color: 'text-yellow-500' },
-  { label: 'Utilisateurs', value: 248, icon: 'pi pi-users', color: 'text-blue-500' },
-  { label: 'Téléchargements', value: '18k', icon: 'pi pi-download', color: 'text-green-500' },
-]
+onMounted(async () => {
+  await depositStore.fetchAll()
+})
+
+const pendingCount = computed(() => depositStore.pendingCount)
 
 const shortcuts = [
-  { label: 'Gérer les demandes', icon: 'pi pi-inbox', to: '/admin/demandes' },
   { label: 'Gérer les références', icon: 'pi pi-book', to: '/admin/references' },
   { label: 'Gérer les utilisateurs', icon: 'pi pi-users', to: '/admin/utilisateurs' },
+  { label: 'Catégories', icon: 'pi pi-tags', to: '/admin/categories' },
   { label: 'Voir les logs', icon: 'pi pi-history', to: '/admin/logs' },
 ]
 </script>
@@ -32,15 +33,39 @@ const shortcuts = [
       </p>
     </div>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div v-for="stat in stats" :key="stat.label"
-        :class="['rounded-2xl p-5 backdrop-blur-xl border',
-          theme.isDark ? 'bg-white/5 border-white/10' : 'bg-white/30 border-white/50']">
-        <i :class="[stat.icon, stat.color, 'text-2xl mb-2 block']"></i>
-        <div :class="['text-2xl font-bold', theme.isDark ? 'text-bordeaux-200' : 'text-bordeaux-800']">{{ stat.value }}</div>
-        <div :class="['text-xs', theme.isDark ? 'text-bordeaux-500' : 'text-bordeaux-500']">{{ stat.label }}</div>
+    <!-- Cadre dépôts en attente -->
+    <div
+      :class="['rounded-2xl p-6 mb-8 cursor-pointer transition-all hover:-translate-y-1 border-2',
+        theme.isDark
+          ? 'bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/15'
+          : 'bg-yellow-50 border-yellow-300 hover:bg-yellow-100']"
+      @click="router.push('/admin/affectations')"
+    >
+      <div class="flex items-center justify-between">
+        <div>
+          <p :class="['text-xs font-semibold uppercase tracking-widest mb-1',
+            theme.isDark ? 'text-yellow-400' : 'text-yellow-700']">
+            Dépôts en attente d'affectation
+          </p>
+          <div class="flex items-end gap-2">
+            <span :class="['text-4xl font-bold', theme.isDark ? 'text-yellow-300' : 'text-yellow-800']">
+              {{ depositStore.loading ? '...' : pendingCount }}
+            </span>
+            <span :class="['text-sm mb-1', theme.isDark ? 'text-yellow-500' : 'text-yellow-600']">
+              demande{{ pendingCount > 1 ? 's' : '' }} en attente
+            </span>
+          </div>
+        </div>
+        <div :class="['w-14 h-14 rounded-2xl flex items-center justify-center',
+          theme.isDark ? 'bg-yellow-500/20' : 'bg-yellow-200']">
+          <i :class="['pi pi-inbox text-2xl', theme.isDark ? 'text-yellow-400' : 'text-yellow-700']"></i>
+        </div>
       </div>
+      <p :class="['text-xs mt-3 flex items-center gap-1',
+        theme.isDark ? 'text-yellow-500' : 'text-yellow-600']">
+        Cliquez pour affecter les demandes
+        <i class="pi pi-arrow-right text-xs"></i>
+      </p>
     </div>
 
     <!-- Raccourcis -->

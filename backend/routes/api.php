@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ReferenceController;
 use App\Http\Controllers\UserController; 
+use App\Http\Controllers\DepositRequestController;
 
 // ── 1. Routes Publiques (Visiteurs) ──────────────────────────────────
 Route::post('/register', [AuthController::class, 'register']);
@@ -34,6 +35,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/categories' , [CategorieController::class , 'store']);
     Route::put('/categories/{id}', [CategorieController::class, 'update']);
     Route::delete('/categories/{id}', [CategorieController::class, 'destroy']);
+
+
+    //Pour les demandes de depot 
+
+Route::post('/deposit-requests', [DepositRequestController::class, 'store']);
+Route::get('/deposit-requests', [DepositRequestController::class, 'index']);
+Route::put('/deposit-requests/{id}/assign', [DepositRequestController::class, 'assign']);
+Route::get('/my-assigned-requests', [DepositRequestController::class, 'myAssignedRequests']);
 
 
         //Gestion des references 

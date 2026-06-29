@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DepositRequest extends Model
 {
-    use SoftDeletes;
+    // use SoftDeletes;
 
     protected $fillable = ['applicant_id', 'assigned_manager_id', 'title', 'description', 'proposed_file', 'status'];
     protected $dates = ['deleted_at'];

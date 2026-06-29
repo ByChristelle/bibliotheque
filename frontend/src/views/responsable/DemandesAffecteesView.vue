@@ -1,17 +1,20 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import Button from 'primevue/button'
 import Textarea from 'primevue/textarea'
 import Dialog from 'primevue/dialog'
+import { useDepositRequestsStore } from '@/stores/depositRequests'
+
+const depositStore= useDepositRequestsStore();
 
 const theme = useThemeStore()
 
-const demandes = ref([
-  { id: 1, title: 'Introduction aux algorithmes', auteur: 'Jean Kouassi', category: 'Sciences', date: '17/06/2026', status: 'en attente' },
-  { id: 2, title: 'Droit des contrats', auteur: 'Marie Tall', category: 'Droit', date: '16/06/2026', status: 'en attente' },
-  { id: 3, title: 'Histoire contemporaine', auteur: 'Paul Diallo', category: 'Histoire', date: '15/06/2026', status: 'en attente' },
-])
+const demandes = computed(()=>depositStore.assignedRequests)
+onMounted(()=>{
+  depositStore.fetchMyAssigned()
+})
+
 
 const showRefuserDialog = ref(false)
 const selectedDemande = ref(null)
