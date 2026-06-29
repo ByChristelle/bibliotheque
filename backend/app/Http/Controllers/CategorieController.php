@@ -3,12 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Http\Requests\StoreCategorieRequest;
+use App\Http\Requests\UpdateCategorieRequest;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 use Illuminate\Support\Facades\Validator;
+
 class CategorieController extends Controller
 {
+    use AuthorizesRequests;
  
     public function index(){
+        $this->authorize('viewAny',Category::class);
         $categories= Category::with('references')->latest()->get();
 
         return response()->json([
@@ -17,26 +25,17 @@ class CategorieController extends Controller
     }
 
        // Créer une nouvelle catégorie
-    public function store(Request $request){
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:categories,name',
-            'slug' => 'required|string|max:255|unique:categories,slug',
-            'description' => 'nullable|string',
-            'status' => 'nullable|string|in:active,inactive',
-        ]);
+    public function store(StoreCategorieRequest $requestStore){
 
-        if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        $this->authorize('create', Category::class);
+        //recuperer les donnés depuis le request
+        $data=$requestStore->validated();
+        
+           if (!isset($data['status'])) {
+        $data['status'] = 'active';
+    }
 
-        $category = Category::create([
-            'name' => $request->input('name'),
-            'slug' => $request->input('slug'),
-            'description' => $request->input('description'),
-            'status' => 'active',
-        ]);
+        $category = Category::create($data);
 
         return response()->json([
             'message' => 'Catégorie créée avec succès',
@@ -45,21 +44,13 @@ class CategorieController extends Controller
     }
 
     //Pour la modification 
-    public function update(Request $request, $id)
+    public function update(UpdateCategorieRequest $request, int $id)
 {
     $category = Category::findOrFail($id);
+    $data= $request ->validated();
+   
 
-    $validator = Validator::make($request->all(), [
-        'name' => 'required|string|max:255|unique:categories,name,' . $id,
-        'slug' => 'required|string|max:255|unique:categories,slug,' . $id,
-        'description' => 'nullable|string',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    $category->update($request->only('name', 'slug', 'description'));
+    $category->update($data);
 
     return response()->json([
         'message' => 'Catégorie modifiée avec succès',
@@ -70,11 +61,19 @@ class CategorieController extends Controller
 
 public function destroy (int $id){
     $categorie = Category::findOrFail($id);
+      $this->authorize('delete', $categorie);
+    
+    // Vérifier si la catégorie a des références
+    if ($categorie->references()->count() > 0) {
+        return response()->json([
+            'message' => 'Impossible de supprimer cette catégorie car elle contient des références.'
+        ], 422);
+    }
 
     $categorie->delete();
 
     return response()->json([
-        'message' => 'utilisateur archivé avec succès .',
+        'message' => 'Catégorie archivée avec succès.',
         'id'=>$id
     ], 200);
 }

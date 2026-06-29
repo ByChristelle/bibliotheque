@@ -4,16 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Http\Requests\StoreUsersRequest;
+use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+// use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
+    use AuthorizesRequests;
 
     public function index(){
+      $this->authorize('viewAny',User::class);
+
         $user=User::latest()->get();
         
         return response()->json([
@@ -23,7 +29,10 @@ class UserController extends Controller
     }
     public function store(StoreUsersRequest $request): JsonResponse
     {
+      $this->authorize('create',User::class);
         $data = $request->validated();
+
+
 
         // 1. Gestion de l'upload de l'avatar si présent
         if ($request->hasFile('avatar')) {
@@ -38,6 +47,7 @@ class UserController extends Controller
         // 3. Statut par défaut à la création
         $data['status'] = 'active';
 
+
         // 4. Création de l'utilisateur en BDD
         $user = User::create($data);
 
@@ -48,27 +58,19 @@ class UserController extends Controller
     }
 
 
-  public function update(Request $request, int $id): JsonResponse
+  public function update(UpdateUserRequest $requestUpdate, int $id): JsonResponse
 {
     $user = User::findOrFail($id);
+    $data= $requestUpdate->validated();
+    $this->authorize('update',$user);
 
-    $validated = $request->validate([
-        'first_name' => ['nullable', 'string', 'max:255'],
-        'last_name'  => ['nullable', 'string', 'max:255'],
-        'email'      => ['nullable', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-        'phone'      => ['nullable', 'string', 'max:20'],
-        'role'       => ['nullable', 'string', 'in:admin,responsable_rh,responsable_demande,user'],
-        'password'   => ['nullable', 'string', 'min:8'],
-        'status'     => ['nullable', 'string', 'in:active,inactive,suspended'],
-    ]);
-
-    if (isset($validated['first_name'])) $user->first_name = $validated['first_name'];
-    if (isset($validated['last_name'])) $user->last_name = $validated['last_name'];
-    if (isset($validated['email'])) $user->email = $validated['email'];
-    if (isset($validated['phone'])) $user->phone = $validated['phone'];
-    if (isset($validated['role'])) $user->role = $validated['role'];
-    if (!empty($validated['password'])) $user->password = Hash::make($validated['password']);
-    if (isset($validated['status'])) $user->status = $validated['status'];
+    if (isset($data['first_name'])) $user->first_name = $data['first_name'];
+    if (isset($data['last_name'])) $user->last_name = $data['last_name'];
+    if (isset($data['email'])) $user->email = $data['email'];
+    if (isset($data['phone'])) $user->phone = $data['phone'];
+    if (isset($data['role'])) $user->role = $data['role'];
+    if (!empty($data['password'])) $user->password = Hash::make($data['password']);
+    if (isset($data['status'])) $user->status = $data['status'];
 
     $user->save();
 
@@ -80,7 +82,7 @@ class UserController extends Controller
     public function destroy( int $id)
 {
     $user = User::findOrFail($id);
-    
+          $this->authorize('delete',$user);
     // Laravel remplit automatiquement la colonne 'deleted_at' grâce au trait SoftDeletes
     $user->delete(); 
 

@@ -7,14 +7,18 @@ use App\Http\Requests\StoreDepositRequestRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 
 class DepositRequestController extends Controller
 {
+    use AuthorizesRequests;
 
 
 public function index(): JsonResponse
 {
+    $this->authorize('viewAny' , DepositRequest::class);
     $requests = DepositRequest::with('applicant')
         ->latest()
         ->get();
@@ -30,6 +34,8 @@ public function index(): JsonResponse
     //Pour la création 
     public function store(StoreDepositRequestRequest $request): JsonResponse
     {
+    $this->authorize('create' , DepositRequest::class);
+
         $data = $request->validated();
 
         if ($request->hasFile('proposed_file')) {
@@ -55,6 +61,7 @@ public function index(): JsonResponse
     public function assign(Request $request, int $id): JsonResponse
 {
     $depositRequest = DepositRequest::findOrFail($id);
+      $this->authorize('assign', $depositRequest);
 
     $request->validate([
         'manager_id' => ['required', 'exists:users,id'],
