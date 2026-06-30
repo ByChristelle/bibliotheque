@@ -78,11 +78,25 @@ public function index(): JsonResponse
 }
 
 
-
+//Pour les assignation des responsable demande
 public function myAssignedRequests(): JsonResponse
 {
     $requests = DepositRequest::with('applicant')
         ->where('assigned_manager_id', Auth::id())
+        ->latest()
+        ->get();
+
+    return response()->json([
+        'deposit_requests' => $requests,
+    ]);
+}
+
+//Pour les demandes de depot de l'utilisateur
+public function myRequests(){
+    $this->authorize('viewAny', DepositRequest::class); 
+    
+    $requests = DepositRequest::with('assignedManager')
+        ->where('applicant_id', Auth::id())
         ->latest()
         ->get();
 

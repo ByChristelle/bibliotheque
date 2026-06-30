@@ -11,3 +11,4 @@ use Illuminate\Support\Facades\Route;
     Route::get('/deposit-requests', [DepositRequestController::class, 'index'])->middleware('role:admin,responsable_demande');
     Route::put('/deposit-requests/{id}/assign', [DepositRequestController::class, 'assign'])->middleware('role:admin');
     Route::get('/my-assigned-requests', [DepositRequestController::class, 'myAssignedRequests'])->middleware('role:responsable_demande');
+    Route::get('/my-requests', [DepositRequestController::class , 'myRequests'])->middleware('role:user') ;

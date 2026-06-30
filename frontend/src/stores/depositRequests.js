@@ -11,12 +11,13 @@ export const useDepositRequestsStore = defineStore('depositRequests', {
     selectedRequest: null,
 showAssignDialog: false,
 assignedRequests: [],
+myRequests:[],
 
   }),
 
   actions: {
 
-
+//La récupération pour le compte de la vue de l'admin
     async fetchAll() {
   this.loading = true
   try {
@@ -32,6 +33,23 @@ assignedRequests: [],
   }
 },
 
+    // Récupérer les demandes de l'utilisateur connecté
+    async fetchMyRequests() {
+      this.loading = true
+      try {
+        const response = await api.get('/my-requests')
+        this.myRequests = response.data.deposit_requests
+        return true
+      } catch (error) {
+        console.error("Erreur lors de la récupération des demandes", error)
+        this.error = error.response?.data?.message || "Erreur de chargement"
+        return false
+      } finally {
+        this.loading = false
+      }
+    },
+
+      //Permet la soumission du formulaire
     async submit(formData) {
       this.loading = true
       this.errors = null
@@ -81,7 +99,7 @@ async assign(requestId, managerId) {
   }
 },
 
-
+//Pour la recuperation 
 async fetchMyAssigned() {
   this.loading = true
   try {

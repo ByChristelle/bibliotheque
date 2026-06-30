@@ -13,7 +13,8 @@ class DepositRequestPolicy
      */
     public function viewAny(User $user): bool
     {
-        return in_array($user->role , ['admin','responsable_demande' ]);
+        // return in_array($user->role , ['admin','responsable_demande' ]);
+        return true;
     }
 
     /**
