@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DepositRequest extends Model
 {
@@ -27,5 +28,11 @@ class DepositRequest extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(DepositRequestReview::class);
+    }
+
+     // Nouvelle relation : un brouillon de référence par demande
+    public function referenceBrouillon(): HasOne
+    {
+        return $this->hasOne(ReferenceBrouillon::class);
     }
 }

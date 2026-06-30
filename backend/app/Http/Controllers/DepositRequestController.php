@@ -51,6 +51,38 @@ public function index(): JsonResponse
             'status'        => 'pending',
         ]);
 
+        
+        // 2. Créer le brouillon de référence associé
+        $referenceBrouillonData = [
+            'deposit_request_id' => $depositRequest->id,
+            'title'              => $data['title'],
+            'subtitle'           => $data['subtitle'] ?? null,
+            'authors'            => $data['authors'],
+            'category_id'        => $data['category_id'],
+            'publisher'          => $data['publisher'] ?? null,
+            'publication_year'   => $data['publication_year'] ?? null,
+            'pages'              => $data['pages'] ?? null,
+            'isbn'               => $data['isbn'] ?? null,
+            'language'           => $data['language'],
+            'document_type'      => $data['document_type'],
+            'keywords'           => $data['keywords'] ?? null,
+            'abstract'           => $data['abstract'] ?? null,
+        ];
+
+        // Uploader l'image de couverture si présente
+        if (isset($data['cover_image'])) {
+            $referenceBrouillonData['cover_image'] = $data['cover_image']->store('reference_covers', 'public');
+        }
+
+        // Uploader le fichier PDF si présent
+        if (isset($data['file'])) {
+            $referenceBrouillonData['file_path'] = $data['file']->store('reference_files', 'public');
+        } elseif (isset($data['proposed_file'])) {
+            $referenceBrouillonData['file_path'] = $depositRequest->proposed_file;
+        }
+
+        $depositRequest->referenceBrouillon()->create($referenceBrouillonData);
+
         return response()->json([
             'message'        => 'Demande soumise avec succès.',
             'deposit_request' => $depositRequest->load('applicant'),
