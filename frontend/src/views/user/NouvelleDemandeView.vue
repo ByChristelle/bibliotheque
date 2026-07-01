@@ -71,9 +71,22 @@ function onFileChange(e) {
 
 async function submit() {
   const formData = new FormData()
-  formData.append('title', form.value.title)
-  if (form.value.description) formData.append('description', form.value.abstract)
-  if (form.value.file) formData.append('proposed_file', form.value.file)
+
+  formData.append('title',           form.value.title)
+  formData.append('authors',         form.value.authors)
+  formData.append('language',        form.value.language)
+  formData.append('document_type',   form.value.document_type)
+  formData.append('category_id',     form.value.category_id)
+
+  if (form.value.subtitle)          formData.append('subtitle',          form.value.subtitle)
+  if (form.value.abstract)          formData.append('abstract',          form.value.abstract)
+  if (form.value.publisher)         formData.append('publisher',         form.value.publisher)
+  if (form.value.publication_year)  formData.append('publication_year',  form.value.publication_year)
+  if (form.value.pages)             formData.append('pages',             form.value.pages)
+  if (form.value.isbn)              formData.append('isbn',              form.value.isbn)
+  if (form.value.keywords)          formData.append('keywords',          form.value.keywords)
+  if (form.value.cover_image)       formData.append('cover_image',       form.value.cover_image)
+  if (form.value.file)              formData.append('proposed_file',     form.value.file)
 
   loading.value = true
   const success = await depositStore.submit(formData)
@@ -86,6 +99,7 @@ async function submit() {
     toast.add({ severity: 'error', summary: 'Erreur', detail: 'Une erreur est survenue.', life: 4000 })
   }
 }
+
 
 </script>
 

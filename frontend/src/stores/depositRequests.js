@@ -115,5 +115,39 @@ async fetchMyAssigned() {
 },
 
 
+async approve(requestId) {
+  this.loading = true
+  try {
+    const response = await api.put(`/deposit-requests/${requestId}/approve`)
+    const index = this.assignedRequests.findIndex(r => r.id === requestId)
+    if (index !== -1) this.assignedRequests[index].status = 'approved_by_manager'
+    this.message = response.data.message
+    return true
+  } catch (error) {
+    console.error('Erreur validation', error)
+    return false
+  } finally {
+    this.loading = false
+  }
+},
+
+async reject(requestId, justification) {
+  this.loading = true
+  try {
+    const response = await api.put(`/deposit-requests/${requestId}/reject`, { justification })
+    const index = this.assignedRequests.findIndex(r => r.id === requestId)
+    if (index !== -1) this.assignedRequests[index].status = 'rejected_by_manager'
+    this.message = response.data.message
+    return true
+  } catch (error) {
+    console.error('Erreur refus', error)
+    return false
+  } finally {
+    this.loading = false
+  }
+},
+
+
+
   },
 })
