@@ -12,15 +12,16 @@ class ReferencePolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return in_array($user->role , ['admin' , 'responsable_rh' , 'responsable_demande' ,'user']);
+        return true;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Reference $reference): bool
+
+    public function view(?User $user, Reference $reference): bool
     {
         return true;
     }

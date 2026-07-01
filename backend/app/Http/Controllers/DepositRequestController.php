@@ -19,7 +19,7 @@ class DepositRequestController extends Controller
 public function index(): JsonResponse
 {
     $this->authorize('viewAny' , DepositRequest::class);
-    $requests = DepositRequest::with('applicant')
+    $requests = DepositRequest::with('applicant' ,'referenceBrouillon.category')
         ->latest()
         ->get();
 
@@ -89,7 +89,7 @@ public function index(): JsonResponse
         ], 201);
     }
 
-
+//Pour  assigner la demande a un responsable
     public function assign(Request $request, int $id): JsonResponse
 {
     $depositRequest = DepositRequest::findOrFail($id);
@@ -113,7 +113,7 @@ public function index(): JsonResponse
 //Pour les assignation des responsable demande
 public function myAssignedRequests(): JsonResponse
 {
-    $requests = DepositRequest::with('applicant')
+    $requests = DepositRequest::with('applicant' , 'referenceBrouillon.category')
         ->where('assigned_manager_id', Auth::id())
         ->latest()
         ->get();
@@ -127,13 +127,48 @@ public function myAssignedRequests(): JsonResponse
 public function myRequests(){
     $this->authorize('viewAny', DepositRequest::class); 
     
-    $requests = DepositRequest::with('assignedManager')
+    $requests = DepositRequest::with('assignedManager' ,'referenceBrouillon.category')
         ->where('applicant_id', Auth::id())
         ->latest()
         ->get();
 
     return response()->json([
         'deposit_requests' => $requests,
+    ]);
+}
+
+// Pour valider une demande
+public function approve(int $id): JsonResponse
+{
+    $depositRequest = DepositRequest::findOrFail($id);
+    
+    $depositRequest->update([
+        'status' => 'approved_by_manager',
+    ]);
+
+    return response()->json([
+        'message' => 'Demande validée avec succès.',
+        'deposit_request' => $depositRequest->load('applicant', 'assignedManager'),
+    ]);
+}
+
+// Pour rejeter une demande
+public function reject(Request $request, int $id): JsonResponse
+{
+    $depositRequest = DepositRequest::findOrFail($id);
+    
+    $request->validate([
+        'justification' => ['required', 'string'],
+    ]);
+    
+    $depositRequest->update([
+        'status' => 'rejected_by_manager',
+        'justification' => $request->justification,
+    ]);
+
+    return response()->json([
+        'message' => 'Demande rejetée avec succès.',
+        'deposit_request' => $depositRequest->load('applicant', 'assignedManager'),
     ]);
 }
 

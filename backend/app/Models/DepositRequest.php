@@ -12,7 +12,7 @@ class DepositRequest extends Model
 {
     // use SoftDeletes;
 
-    protected $fillable = ['applicant_id', 'assigned_manager_id', 'title', 'description', 'proposed_file', 'status'];
+    protected $fillable = ['applicant_id', 'assigned_manager_id', 'title', 'description', 'proposed_file', 'status', 'justification'];
     protected $dates = ['deleted_at'];
 
     public function applicant(): BelongsTo

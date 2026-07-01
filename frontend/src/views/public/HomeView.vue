@@ -1,17 +1,36 @@
 <script setup>
 import { useThemeStore } from '@/stores/theme'
 import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import Button from 'primevue/button'
+import api from '@/services/axios'
 
 const theme = useThemeStore()
 const router = useRouter()
 
-const stats = [
-  { label: 'Références', value: '2 400+', icon: 'pi pi-book' },
-  { label: 'Utilisateurs', value: '1 200+', icon: 'pi pi-users' },
-  { label: 'Téléchargements', value: '18 000+', icon: 'pi pi-download' },
-  { label: 'Catégories', value: '32', icon: 'pi pi-tags' },
-]
+const stats = ref([
+  { label: 'Références', value: '0', icon: 'pi pi-book' },
+  { label: 'Utilisateurs', value: '0', icon: 'pi pi-users' },
+  { label: 'Téléchargements', value: '0', icon: 'pi pi-download' },
+  { label: 'Catégories', value: '0', icon: 'pi pi-tags' },
+])
+
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/stats')
+    // Mettre à jour les stats !
+    stats.value[0].value = response.data.stats.references.toLocaleString('fr-FR')
+stats.value[1].value = response.data.stats.users.toLocaleString('fr-FR')
+stats.value[2].value = response.data.stats.downloads.toLocaleString('fr-FR')
+stats.value[3].value = response.data.stats.categories.toLocaleString('fr-FR')
+  } catch (error) {
+    console.error('Erreur lors du chargement des stats', error)
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
@@ -28,8 +47,8 @@ const stats = [
     <div
       class="fixed inset-0 z-0"
       :style="theme.isDark
-        ? 'background: rgba(10, 0, 5, 0.65)'
-        : 'background: rgba(30, 5, 15, 0.40)'"
+        ? 'background: rgba(10, 0, 5, 0.25)'
+        : 'background: rgba(30, 5, 10, 0.40)'"
     ></div>
 
     <!-- Contenu par-dessus -->

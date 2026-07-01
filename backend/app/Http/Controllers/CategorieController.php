@@ -6,34 +6,38 @@ use App\Models\Category;
 use App\Http\Requests\StoreCategorieRequest;
 use App\Http\Requests\UpdateCategorieRequest;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-
 use Illuminate\Support\Facades\Validator;
 
 class CategorieController extends Controller
 {
     use AuthorizesRequests;
- 
-    public function index(){
-        $this->authorize('viewAny',Category::class);
-        $categories= Category::with('references')->latest()->get();
+
+    public function index()
+    {
+        $this->authorize('viewAny', Category::class);
+
+        if (Auth::check() && in_array(Auth::user()->role, ['admin', 'responsable_rh', 'responsable_demande'])) {
+            $categories = Category::with('references')->latest()->get();
+        } else {
+            $categories = Category::latest()->get();
+        }
 
         return response()->json([
-            'categories'=>$categories,
-        ],200);
+            'categories' => $categories,
+        ], 200);
     }
 
-       // Créer une nouvelle catégorie
-    public function store(StoreCategorieRequest $requestStore){
-
+    public function store(StoreCategorieRequest $requestStore)
+    {
         $this->authorize('create', Category::class);
-        //recuperer les donnés depuis le request
-        $data=$requestStore->validated();
-        
-           if (!isset($data['status'])) {
-        $data['status'] = 'active';
-    }
+
+        $data = $requestStore->validated();
+
+        if (!isset($data['status'])) {
+            $data['status'] = 'active';
+        }
 
         $category = Category::create($data);
 
@@ -43,39 +47,39 @@ class CategorieController extends Controller
         ], 201);
     }
 
-    //Pour la modification 
     public function update(UpdateCategorieRequest $request, int $id)
-{
-    $category = Category::findOrFail($id);
-    $data= $request ->validated();
-   
+    {
+        $category = Category::findOrFail($id);
 
-    $category->update($data);
+        $this->authorize('update', $category);
 
-    return response()->json([
-        'message' => 'Catégorie modifiée avec succès',
-        'category' => $category
-    ]);
-}
+        $data = $request->validated();
 
+        $category->update($data);
 
-public function destroy (int $id){
-    $categorie = Category::findOrFail($id);
-      $this->authorize('delete', $categorie);
-    
-    // Vérifier si la catégorie a des références
-    if ($categorie->references()->count() > 0) {
         return response()->json([
-            'message' => 'Impossible de supprimer cette catégorie car elle contient des références.'
-        ], 422);
+            'message' => 'Catégorie modifiée avec succès',
+            'category' => $category
+        ]);
     }
 
-    $categorie->delete();
+    public function destroy(int $id)
+    {
+        $categorie = Category::findOrFail($id);
 
-    return response()->json([
-        'message' => 'Catégorie archivée avec succès.',
-        'id'=>$id
-    ], 200);
-}
+        $this->authorize('delete', $categorie);
 
+        if ($categorie->references()->count() > 0) {
+            return response()->json([
+                'message' => 'Impossible de supprimer cette catégorie car elle contient des références.'
+            ], 422);
+        }
+
+        $categorie->delete();
+
+        return response()->json([
+            'message' => 'Catégorie archivée avec succès.',
+            'id' => $id
+        ], 200);
+    }
 }

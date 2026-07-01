@@ -7,7 +7,8 @@ export const useReferenceStore = defineStore('reference', {
         loading:false,
         error:null , 
         message:null ,
-        references:[]
+        references:[],
+        currentReference: null
     }),
 
 
@@ -28,6 +29,22 @@ export const useReferenceStore = defineStore('reference', {
             this.loading=false
         }
 
+        },
+
+    async fetchSingleReference(id){
+        this.loading= true
+        try {
+            const response= await api.get(`/references/${id}`)
+            this.currentReference=response.data.reference
+            return true 
+            
+        } catch (error) {
+        console.error("Erreur lors de la récupération de la référence", error)
+        this.error = error.response?.data?.message || error.message
+            
+        }finally{
+            this.loading=false
         }
+    }
     }
 })
