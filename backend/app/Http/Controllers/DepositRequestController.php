@@ -167,7 +167,7 @@ public function reject(Request $request, int $id): JsonResponse
     ]);
 
     return response()->json([
-        'message' => 'Demande rejetée avec succès.',
+        'message' => 'Demande rejetée .',
         'deposit_request' => $depositRequest->load('applicant', 'assignedManager'),
     ]);
 }
