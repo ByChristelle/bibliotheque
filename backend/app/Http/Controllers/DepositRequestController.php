@@ -172,4 +172,46 @@ public function reject(Request $request, int $id): JsonResponse
     ]);
 }
 
+//Pour la publication de la reference 
+
+public function publish(int $id): JsonResponse
+{
+    $depositRequest = DepositRequest::with('referenceBrouillon.category')->findOrFail($id);
+
+    if ($depositRequest->status !== 'approved_by_manager') {
+        return response()->json(['message' => 'La demande doit être validée par un responsable avant publication.'], 422);
+    }
+
+    $brouillon = $depositRequest->referenceBrouillon;
+    if (!$brouillon) {
+        return response()->json(['message' => 'Aucun brouillon de référence trouvé.'], 422);
+    }
+
+    // Créer la référence publiée depuis le brouillon
+    $reference = \App\Models\Reference::create([
+        'title'            => $brouillon->title,
+        'subtitle'         => $brouillon->subtitle,
+        'abstract'         => $brouillon->abstract,
+        'isbn'             => $brouillon->isbn,
+        'publication_year' => $brouillon->publication_year,
+        'language'         => $brouillon->language,
+        'document_type'    => $brouillon->document_type,
+        'category_id'      => $brouillon->category_id,
+        'publisher_id'     => 1, // TODO: à lier au brouillon si nécessaire
+        'uploaded_by'      => $depositRequest->applicant_id,
+        'cover_image'      => $brouillon->cover_image,
+        'file_path'        => $brouillon->file_path,
+        'pages'            => $brouillon->pages,
+        'status'           => 'published',
+    ]);
+
+    $depositRequest->update(['status' => 'published']);
+
+    return response()->json([
+        'message'   => 'Référence publiée avec succès.',
+        'reference' => $reference,
+    ]);
+}
+
+
 }

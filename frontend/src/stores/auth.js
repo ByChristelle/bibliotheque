@@ -118,6 +118,7 @@ async fetchUser() {
       await this.logout();
       return;
     }
+     this.user = user
   } catch {
     this.user = null
   }

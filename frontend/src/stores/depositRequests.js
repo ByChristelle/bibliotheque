@@ -131,6 +131,23 @@ async approve(requestId) {
   }
 },
 
+async publish(requestId) {
+  this.loading = true
+  try {
+    const response = await api.put(`/deposit-requests/${requestId}/publish`)
+    const index = this.requests.findIndex(r => r.id === requestId)
+    if (index !== -1) this.requests[index].status = 'published'
+    this.pendingCount = this.requests.filter(r => r.status === 'pending' && !r.assigned_manager_id).length
+    this.message = response.data.message
+    return true
+  } catch (error) {
+    console.error('Erreur publication', error)
+    return false
+  } finally {
+    this.loading = false
+  }
+},
+
 async reject(requestId, justification) {
   this.loading = true
   try {

@@ -17,3 +17,7 @@ use Illuminate\Support\Facades\Route;
 
     Route::put('/deposit-requests/{id}/approve',[DepositRequestController::class, 'approve'])->middleware('role:responsable_demande');
 Route::put('/deposit-requests/{id}/reject',  [DepositRequestController::class, 'reject'])->middleware('role:responsable_demande');
+
+//pour la publication de la reference
+Route::put('/deposit-requests/{id}/publish', [DepositRequestController::class, 'publish']);
+

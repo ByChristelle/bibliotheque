@@ -98,8 +98,7 @@ const router = createRouter({
 
 router.beforeEach(async(to) => {
   const auth = useAuthStore()
-  const user = auth.user
-
+  
   if(auth.user){
     try{
       await auth.fetchUser()
@@ -108,7 +107,8 @@ router.beforeEach(async(to) => {
       return { name: 'login' };
     }
   }
-
+  const user = auth.user
+  
   // Route réservée aux invités (login, register)
   if (to.meta.requiresGuest && user) {
     return auth.redirectUserByRole(user.role)
