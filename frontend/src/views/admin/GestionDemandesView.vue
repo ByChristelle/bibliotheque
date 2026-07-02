@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useThemeStore } from '@/stores/theme'
+import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Dialog from 'primevue/dialog'
@@ -14,6 +15,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { Loader2 } from 'lucide-vue-next'
 
 const theme        = useThemeStore()
+const router       = useRouter()
 const depositStore = useDepositRequestsStore()
 const usersStore   = useUsersStore()
 const toast        = useToast()
@@ -35,8 +37,8 @@ const statusOptions = [
 
 const statusLabel = {
   pending:             'En attente',
-  approved_by_manager: 'Validée · resp.',
-  rejected_by_manager: 'Refusée · resp.',
+  approved_by_manager: 'Validée · resp',
+  rejected_by_manager: 'Refusée · resp',
   published:           'Publiée',
   rejected:            'Rejetée',
 }
@@ -72,6 +74,7 @@ function resetPage() { currentPage.value = 1 }
 const responsables = computed(() =>
   usersStore.users
     .filter(u => u.role === 'responsable_demande' && u.status === 'active')
+    .filter(u => !selectedDemande || u.id !== selectedDemande.assigned_manager_id)
     .map(u => ({ label: `${u.first_name} ${u.last_name}`, value: u.id }))
 )
 
@@ -120,6 +123,19 @@ async function confirmerAction() {
   showJustifDialog.value = false
   toast.add({ severity: 'info', summary: 'Action effectuée', life: 2000 })
 }
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
+
+function goToLogs(d) {
+  router.push({ name: 'admin-logs', query: { depositRequestId: d.id } })
+}
 </script>
 
 <template>
@@ -146,33 +162,38 @@ async function confirmerAction() {
     </div>
 
     <!-- Liste -->
-    <div v-else-if="paginated.length" class="flex flex-col gap-3">
+    <div v-else-if="paginated.length" class="flex flex-col gap-4">
       <div v-for="d in paginated" :key="d.id"
         :class="['rounded-2xl p-5 border transition-all duration-200', theme.isDark ? 'bg-white/5 border-white/[0.07]' : 'bg-white border-[#ECECEC] shadow-sm hover:shadow-md']">
+        <!-- Partie principale -->
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-              <h3 class="font-semibold text-sm truncate" :class="theme.isDark ? 'text-white' : 'text-[#2D2D2D]'">{{ d.title }}</h3>
+            <div class="flex items-center gap-3 mb-2 flex-wrap">
+              <h3 :class="['font-semibold text-lg', theme.isDark ? 'text-white' : 'text-[#2D2D2D]']">{{ d.title }}</h3>
               <Tag :value="statusLabel[d.status] || d.status" :severity="statusSeverity[d.status]" />
             </div>
-            <p class="text-xs text-[#94A3B8]">
-              Déposé par <span class="font-medium" :class="theme.isDark ? 'text-white/70' : 'text-[#555]'">{{ d.applicant?.first_name }} {{ d.applicant?.last_name }}</span>
-              · {{ new Date(d.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }) }}
+            <p :class="['text-sm', theme.isDark ? 'text-bordeaux-300' : 'text-[#555]']">
+              Déposé par <span class="font-medium">{{ d.applicant?.first_name }} {{ d.applicant?.last_name }}</span>
             </p>
-            <p v-if="d.assigned_manager" class="text-xs text-[#94A3B8] mt-0.5">
-              Responsable : <span class="font-medium" :class="theme.isDark ? 'text-white/60' : 'text-[#555]'">{{ d.assigned_manager?.first_name }} {{ d.assigned_manager?.last_name }}</span>
+            <p :class="['text-sm mt-1', theme.isDark ? 'text-bordeaux-400' : 'text-[#777]']">
+              {{ formatDateTime(d.created_at) }}
             </p>
-            <div v-if="d.justification" class="mt-2 p-3 rounded-xl text-xs" :class="theme.isDark ? 'bg-red-900/20 text-red-300 border border-red-800/20' : 'bg-red-50 text-red-700 border border-red-200'">
-              <i class="pi pi-info-circle mr-1"></i>{{ d.justification }}
-            </div>
+            <p v-if="d.assignedManager" :class="['text-sm mt-1', theme.isDark ? 'text-green-300' : 'text-green-700']">
+              <i class="pi pi-check mr-1"></i> Responsable : {{ d.assignedManager.first_name }} {{ d.assignedManager.last_name }}
+            </p>
           </div>
 
-          <div class="flex flex-col gap-1.5 shrink-0">
+          <div class="flex flex-col gap-2 shrink-0">
             <Button v-if="d.status === 'approved_by_manager'" label="Publier" icon="pi pi-check" size="small" severity="success" @click="confirmerPublier(d)" />
             <Button v-if="d.status === 'rejected_by_manager'" label="Invalider le refus" icon="pi pi-undo" size="small" @click="ouvrirAction(d, 'invalider')" />
             <Button v-if="d.status === 'rejected_by_manager'" label="Rejeter" icon="pi pi-times" size="small" severity="danger" outlined @click="ouvrirAction(d, 'rejeter')" />
-            <Button v-if="!['published','rejected'].includes(d.status)" :label="d.assigned_manager_id ? 'Réaffecter' : 'Affecter'" icon="pi pi-user-edit" size="small" outlined @click="ouvrirAffecter(d)" />
+            <Button v-if="!['published','rejected'].includes(d.status)" :label="d.assignedManager ? 'Réaffecter' : 'Affecter'" icon="pi pi-user-edit" size="small" outlined @click="ouvrirAffecter(d)" />
+            <Button label="Voir historique" icon="pi pi-history" size="small" text @click="goToLogs(d)" />
           </div>
+        </div>
+
+        <div v-if="d.justification" class="mt-4 p-3 rounded-xl text-sm" :class="theme.isDark ? 'bg-red-900/20 text-red-300 border border-red-800/20' : 'bg-red-50 text-red-700 border border-red-200'">
+          <i class="pi pi-info-circle mr-1"></i>{{ d.justification }}
         </div>
       </div>
     </div>
@@ -193,7 +214,8 @@ async function confirmerAction() {
         </button>
         <button v-for="p in totalPages" :key="p" @click="currentPage = p"
           :class="['w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium transition-all',
-            p === currentPage ? 'bg-[#7A0026] text-white' : (theme.isDark ? 'text-white/60 hover:bg-white/10' : 'text-[#555] hover:bg-[#F8F6F6] border border-[#ECECEC]')]">
+            p === currentPage ? 'bg-[#7A0026] text-white' : (theme.isDark ? 'text-white/60 hover:bg-white/10' : 'text-[#555] hover:bg-[#F8F6F6] border border-[#ECECEC]')
+          ]">
           {{ p }}
         </button>
         <button :disabled="currentPage === totalPages" @click="currentPage++"

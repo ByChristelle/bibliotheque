@@ -26,4 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     require __DIR__ . '/api/demandes.php';
     require __DIR__ . '/api/users.php';
+
+    // Activity Logs routes
+    Route::get('/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index']);
+    Route::get('/activity-logs/deposit-request/{id}', [App\Http\Controllers\ActivityLogController::class, 'show']);
 });

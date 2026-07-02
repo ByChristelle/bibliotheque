@@ -16,40 +16,7 @@ myRequests:[],
   }),
 
   actions: {
-
-//La récupération pour le compte de la vue de l'admin
-    async fetchAll() {
-  this.loading = true
-  try {
-    const response = await api.get('/deposit-requests')
-    this.requests     = response.data.deposit_requests
-    this.pendingCount = response.data.pending_count
-    return true
-  } catch (error) {
-    console.error('Erreur récupération demandes', error)
-    return false
-  } finally {
-    this.loading = false
-  }
-},
-
-    // Récupérer les demandes de l'utilisateur connecté
-    async fetchMyRequests() {
-      this.loading = true
-      try {
-        const response = await api.get('/my-requests')
-        this.myRequests = response.data.deposit_requests
-        return true
-      } catch (error) {
-        console.error("Erreur lors de la récupération des demandes", error)
-        this.error = error.response?.data?.message || "Erreur de chargement"
-        return false
-      } finally {
-        this.loading = false
-      }
-    },
-
-      //Permet la soumission du formulaire
+  //Permet la soumission du formulaire
     async submit(formData) {
       this.loading = true
       this.errors = null
@@ -66,6 +33,37 @@ myRequests:[],
         this.loading = false
       }
     },
+    
+    // Récupérer les demandes de l'utilisateur connecté
+    async fetchMyRequests() {
+      this.loading = true
+      try {
+        const response = await api.get('/my-requests')
+        this.myRequests = response.data.deposit_requests
+        return true
+      } catch (error) {
+        console.error("Erreur lors de la récupération des demandes", error)
+        this.error = error.response?.data?.message || "Erreur de chargement"
+        return false
+      } finally {
+        this.loading = false
+      }
+    },
+//La récupération pour le compte de la vue de l'admin
+    async fetchAll() {
+  this.loading = true
+  try {
+    const response = await api.get('/deposit-requests')
+    this.requests     = response.data.deposit_requests
+    this.pendingCount = response.data.pending_count
+    return true
+  } catch (error) {
+    console.error('Erreur récupération demandes', error)
+    return false
+  } finally {
+    this.loading = false
+  }
+},
 
 
     openAssignDialog(request) {
@@ -84,7 +82,6 @@ async assign(requestId, managerId) {
     if (index !== -1) {
       this.requests[index] = response.data.deposit_request
     }
-    // this.pendingCount = this.requests.filter(r => r.status === 'pending').length
 
     this.pendingCount = this.requests.filter(r => r.status === 'pending' && !r.assigned_manager_id).length
     this.message = response.data.message
@@ -99,7 +96,7 @@ async assign(requestId, managerId) {
   }
 },
 
-//Pour la recuperation 
+//Pour la recuperation des demandes affectées
 async fetchMyAssigned() {
   this.loading = true
   try {
@@ -114,7 +111,7 @@ async fetchMyAssigned() {
   }
 },
 
-
+//Pour la validation de la demande
 async approve(requestId) {
   this.loading = true
   try {
@@ -131,6 +128,25 @@ async approve(requestId) {
   }
 },
 
+
+//Pour le refus de la demande
+async reject(requestId, justification) {
+  this.loading = true
+  try {
+    const response = await api.put(`/deposit-requests/${requestId}/reject`, { justification })
+    const index = this.assignedRequests.findIndex(r => r.id === requestId)
+    if (index !== -1) this.assignedRequests[index].status = 'rejected_by_manager'
+    this.message = response.data.message
+    return true
+  } catch (error) {
+    console.error('Erreur refus', error)
+    return false
+  } finally {
+    this.loading = false
+  }
+},
+
+//Pour la publication de la demande par l'admin
 async publish(requestId) {
   this.loading = true
   try {
@@ -142,22 +158,6 @@ async publish(requestId) {
     return true
   } catch (error) {
     console.error('Erreur publication', error)
-    return false
-  } finally {
-    this.loading = false
-  }
-},
-
-async reject(requestId, justification) {
-  this.loading = true
-  try {
-    const response = await api.put(`/deposit-requests/${requestId}/reject`, { justification })
-    const index = this.assignedRequests.findIndex(r => r.id === requestId)
-    if (index !== -1) this.assignedRequests[index].status = 'rejected_by_manager'
-    this.message = response.data.message
-    return true
-  } catch (error) {
-    console.error('Erreur refus', error)
     return false
   } finally {
     this.loading = false

@@ -27,8 +27,11 @@ const pendingRequests = computed(() =>
 
 const responsablesOptions = computed(() =>
   usersStore.users
-    .filter(u => u.role === 'responsable_demande' && (u.status === 'active' || u.status === 'actif'))
-
+    .filter(u => {
+      const isResponsable = u.role === 'responsable_demande' && (u.status === 'active' || u.status === 'actif')
+      const isNotAlreadyAssigned = !depositStore.selectedRequest || u.id !== depositStore.selectedRequest.assigned_manager_id
+      return isResponsable && isNotAlreadyAssigned
+    })
     .map(u => ({ label: `${u.first_name} ${u.last_name}`, value: u.id }))
 )
 
@@ -122,15 +125,18 @@ function formatDate(dateStr) {
               {{ request.applicant?.first_name }} {{ request.applicant?.last_name }}
               · {{ formatDate(request.created_at) }}
             </p>
+            <p v-if="request.assignedManager" :class="['text-xs mt-1', theme.isDark ? 'text-green-300' : 'text-green-700']">
+              <i class="pi pi-check mr-1"></i> Affecté à : {{ request.assignedManager.first_name }} {{ request.assignedManager.last_name }}
+            </p>
           </div>
         </div>
 
         <!-- Bouton affecter -->
         <button
-          :class="['px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shrink-0 bg-bordeaux-700 text-white hover:bg-bordeaux-800']"
+          :class="['px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shrink-0', request.assigned_manager_id ? 'bg-green-700 hover:bg-green-800 text-white' : 'bg-bordeaux-700 text-white hover:bg-bordeaux-800']"
           @click="openDialog(request)"
         >
-          Affecter
+          {{ request.assigned_manager_id ? 'Réaffecter' : 'Affecter' }}
         </button>
       </div>
     </div>

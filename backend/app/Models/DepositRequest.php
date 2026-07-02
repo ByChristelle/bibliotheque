@@ -35,4 +35,10 @@ class DepositRequest extends Model
     {
         return $this->hasOne(ReferenceBrouillon::class);
     }
+
+    // Relation pour les logs d'activité
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class, 'target_id')->where('target_table', 'deposit_requests')->latest();
+    }
 }
