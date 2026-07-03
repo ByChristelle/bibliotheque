@@ -52,6 +52,15 @@ const statusLabel = {
   draft:     'Brouillon',
   archived:  'Archivé',
 }
+
+function lire(ref) {
+  if (ref.file_path) window.open(`http://localhost:8000/api/references/${ref.id}/download`, '_blank')
+}
+
+function telecharger(ref) {
+  window.open(`http://localhost:8000/api/references/${ref.id}/download`, '_blank')
+}
+
 </script>
 
 <template>
@@ -118,6 +127,10 @@ const statusLabel = {
           <!-- Boutons actions -->
           <div class="flex flex-col gap-1.5 mt-1">
             <button
+
+            v-if="ref.file_path"
+@click.stop="lire(ref)"
+
               class="w-full py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200"
               :class="theme.isDark ? 'bg-bordeaux-700/80 text-white hover:bg-bordeaux-600' : 'bg-[#7A0026] text-white hover:bg-[#5e001c]'"
             >
@@ -127,6 +140,7 @@ const statusLabel = {
               Lire
             </button>
             <button
+            @click.stop="telecharger(ref)"
               class="w-full py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200"
               :class="theme.isDark ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-[#F8F0EE] text-[#7A0026] hover:bg-[#E8D6DB]'"
             >

@@ -50,4 +50,26 @@ class ReferenceController extends Controller
             'reference' => $reference,
         ], 200);
     }
+
+
+    public function download(int $id): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+{
+    $reference = Reference::findOrFail($id);
+
+    if (!$reference->file_path) {
+        return response()->json(['message' => 'Aucun fichier disponible.'], 404);
+    }
+
+    // Incrémenter le compteur
+    $reference->increment('download_count');
+
+    $filePath = storage_path('app/public/' . $reference->file_path);
+
+    if (!file_exists($filePath)) {
+        return response()->json(['message' => 'Fichier introuvable.'], 404);
+    }
+
+    return response()->download($filePath, $reference->title . '.pdf');
+}
+
 }

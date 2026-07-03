@@ -7,6 +7,8 @@ use App\Http\Controllers\ReferenceController;
 // Routes publiques
 Route::get('/references' , [ReferenceController::class , 'index']);
 Route::get('/references/{id}' , [ReferenceController::class , 'show']);
+Route::get('/references/{id}/download', [ReferenceController::class, 'download']);
+
 
 // Routes protégées
 Route::middleware(['auth:sanctum' ])->group(function(){

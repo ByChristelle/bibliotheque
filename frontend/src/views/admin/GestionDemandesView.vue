@@ -14,6 +14,8 @@ import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { Loader2 } from 'lucide-vue-next'
 
+import DemandeDetailDialog from '@/components/DemandeDetailDialog.vue'
+
 const theme        = useThemeStore()
 const router       = useRouter()
 const depositStore = useDepositRequestsStore()
@@ -124,6 +126,11 @@ async function confirmerAction() {
   toast.add({ severity: 'info', summary: 'Action effectuée', life: 2000 })
 }
 
+// Voir détail
+const showDetailDialog = ref(false)
+const selectedDetail   = ref(null)
+function voirDetail(d) { selectedDetail.value = d; showDetailDialog.value = true }
+
 function formatDateTime(dateStr) {
   if (!dateStr) return ''
   const date = new Date(dateStr)
@@ -189,6 +196,13 @@ function goToLogs(d) {
             <Button v-if="d.status === 'rejected_by_manager'" label="Rejeter" icon="pi pi-times" size="small" severity="danger" outlined @click="ouvrirAction(d, 'rejeter')" />
             <Button v-if="!['published','rejected'].includes(d.status)" :label="d.assignedManager ? 'Réaffecter' : 'Affecter'" icon="pi pi-user-edit" size="small" outlined @click="ouvrirAffecter(d)" />
             <Button label="Voir historique" icon="pi pi-history" size="small" text @click="goToLogs(d)" />
+            <button @click="voirDetail(d)"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[#60a5fa] bg-[#60a5fa]/10 hover:bg-[#60a5fa]/20">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+              </svg>
+              Analyser
+            </button>
           </div>
         </div>
 
