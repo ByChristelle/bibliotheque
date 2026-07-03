@@ -106,7 +106,6 @@ stopStatusPolling() {
 
 
 
-// Dans auth.js — ajouter une action
 async fetchUser() {
   try {
       const response = await api.get('/me');
@@ -118,6 +117,7 @@ async fetchUser() {
       await this.logout();
       return;
     }
+     this.user = user
   } catch {
     this.user = null
   }

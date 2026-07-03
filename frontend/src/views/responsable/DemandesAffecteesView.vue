@@ -7,25 +7,35 @@ import Dialog from 'primevue/dialog'
 import { useDepositRequestsStore } from '@/stores/depositRequests'
 import { Loader2 } from 'lucide-vue-next'
 import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+const toast = useToast()
 // import ConfirmDialog from 'primevue/confirmdialog'
 
 const confirm = useConfirm()
-
-
-
 
 const depositStore = useDepositRequestsStore()
 const theme = useThemeStore()
 
 const demandes = computed(() => depositStore.assignedRequests)
-onMounted(() => { depositStore.fetchMyAssigned() })
+onMounted(() => { depositStore.fetchMyAssigned()
+  // console.log(selectedDemande.reference_brouillon.cover_image)
+ })
 
 const showDetailDialog  = ref(false)
 const showRefuserDialog = ref(false)
 const selectedDemande   = ref(null)
 const justification     = ref('')
 
-function ouvrirDetail(d) { selectedDemande.value = d; showDetailDialog.value = true }
+// Computed pour gérer les deux cas (camelCase et snake_case)
+const refBrouillon = computed(() => 
+  selectedDemande.value?.referenceBrouillon || selectedDemande.value?.reference_brouillon
+)
+
+function ouvrirDetail(d) { 
+  selectedDemande.value = d; 
+  console.log('selectedDemande:', d, 'refBrouillon:', refBrouillon.value);
+  showDetailDialog.value = true 
+}
 function ouvrirRefus(d)  { selectedDemande.value = d; justification.value = ''; showRefuserDialog.value = true }
 
 async function valider(d) {
@@ -76,6 +86,19 @@ function ll(l)  { return langLabel[l]    || l }
     <div class="flex items-center justify-center py-12" v-if="depositStore.loading">
       <Loader2 class="w-10 h-10 animate-spin text-bordeaux-600" />
       <span class="ml-3 text-sm">Chargement...</span>
+    </div>
+
+    <!-- État vide -->
+    <div v-else-if="demandes.length === 0"
+      :class="['rounded-2xl p-12 text-center border',
+        theme.isDark ? 'bg-white/5 border-white/10' : 'bg-white/30 border-white/50']">
+      <i class="pi pi-check-circle text-4xl text-green-500 mb-3 block"></i>
+      <p :class="['font-semibold', theme.isDark ? 'text-bordeaux-200' : 'text-bordeaux-800']">
+        Aucune affectation en attente
+      </p>
+      <p :class="['text-sm mt-1', theme.isDark ? 'text-bordeaux-400' : 'text-bordeaux-500']">
+        Toutes les demandes ont été traitées.
+      </p>
     </div>
 
     <div v-else class="flex flex-col gap-4">
@@ -129,7 +152,7 @@ function ll(l)  { return langLabel[l]    || l }
           <span :class="['text-xs px-3 py-1.5 rounded-full font-semibold shrink-0', sc(selectedDemande.status)]">{{ sl(selectedDemande.status) }}</span>
         </div>
 
-        <div v-if="selectedDemande.reference_brouillon" class="flex flex-col gap-5">
+        <div v-if="refBrouillon" class="flex flex-col gap-5">
 
           <!-- Identification -->
           <div>
@@ -139,10 +162,10 @@ function ll(l)  { return langLabel[l]    || l }
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div v-for="item in [
-                { label: 'Sous-titre', val: selectedDemande.reference_brouillon.subtitle },
-                { label: 'Auteur(s)', val: selectedDemande.reference_brouillon.authors },
-                { label: 'Catégorie', val: selectedDemande.reference_brouillon.category?.name },
-                { label: 'Type de document', val: dtl(selectedDemande.reference_brouillon.document_type) },
+                { label: 'Sous-titre', val: refBrouillon.subtitle },
+                { label: 'Auteur(s)', val: refBrouillon.authors },
+                { label: 'Catégorie', val: refBrouillon.category?.name },
+                { label: 'Type de document', val: dtl(refBrouillon.document_type) },
               ]" :key="item.label"
                 class="p-3 rounded-xl" :class="theme.isDark ? 'bg-white/5' : 'bg-white border border-[#ECECEC]'">
                 <p class="text-xs text-[#94A3B8] mb-0.5">{{ item.label }}</p>
@@ -159,11 +182,11 @@ function ll(l)  { return langLabel[l]    || l }
             </div>
             <div class="grid grid-cols-3 gap-3">
               <div v-for="item in [
-                { label: 'Langue', val: ll(selectedDemande.reference_brouillon.language) },
-                { label: 'Année', val: selectedDemande.reference_brouillon.publication_year },
-                { label: 'Pages', val: selectedDemande.reference_brouillon.pages },
-                { label: 'Éditeur', val: selectedDemande.reference_brouillon.publisher },
-                { label: 'ISBN', val: selectedDemande.reference_brouillon.isbn, span: 2 },
+                { label: 'Langue', val: ll(refBrouillon.language) },
+                { label: 'Année', val: refBrouillon.publication_year },
+                { label: 'Pages', val: refBrouillon.pages },
+                { label: 'Éditeur', val: refBrouillon.publisher },
+                { label: 'ISBN', val: refBrouillon.isbn, span: 2 },
               ]" :key="item.label"
                 class="p-3 rounded-xl" :class="[theme.isDark ? 'bg-white/5' : 'bg-white border border-[#ECECEC]', item.span ? `col-span-${item.span}` : '']">
                 <p class="text-xs text-[#94A3B8] mb-0.5">{{ item.label }}</p>
@@ -181,8 +204,8 @@ function ll(l)  { return langLabel[l]    || l }
             <div class="flex flex-col gap-3">
               <div class="p-3 rounded-xl" :class="theme.isDark ? 'bg-white/5' : 'bg-white border border-[#ECECEC]'">
                 <p class="text-xs text-[#94A3B8] mb-1">Mots-clés</p>
-                <div v-if="selectedDemande.reference_brouillon.keywords" class="flex flex-wrap gap-1.5">
-                  <span v-for="kw in selectedDemande.reference_brouillon.keywords.split(',')" :key="kw"
+                <div v-if="refBrouillon.keywords" class="flex flex-wrap gap-1.5">
+                  <span v-for="kw in refBrouillon.keywords.split(',')" :key="kw"
                     class="text-xs px-2.5 py-1 rounded-full"
                     :class="theme.isDark ? 'bg-white/10 text-white/70' : 'bg-[#F8F6F6] text-[#555] border border-[#ECECEC]'">
                     {{ kw.trim() }}
@@ -193,26 +216,26 @@ function ll(l)  { return langLabel[l]    || l }
               <div class="p-3 rounded-xl" :class="theme.isDark ? 'bg-white/5' : 'bg-white border border-[#ECECEC]'">
                 <p class="text-xs text-[#94A3B8] mb-1">Résumé</p>
                 <p class="text-sm leading-relaxed" :class="theme.isDark ? 'text-white/80' : 'text-[#2D2D2D]'">
-                  {{ selectedDemande.reference_brouillon.abstract || '—' }}
+                  {{ refBrouillon.abstract || '—' }}
                 </p>
               </div>
             </div>
           </div>
 
           <!-- Fichiers -->
-          <div v-if="selectedDemande.reference_brouillon.cover_image || selectedDemande.reference_brouillon.file_path">
+          <div v-if="refBrouillon.cover_image || refBrouillon.file_path">
             <div class="flex items-center gap-2 mb-3">
               <span class="text-xs font-bold uppercase tracking-widest text-[#94A3B8]">Fichiers joints</span>
               <span class="flex-1 h-px" :class="theme.isDark ? 'bg-white/10' : 'bg-[#ECECEC]'"></span>
             </div>
             <div class="flex gap-4 flex-wrap items-start">
-              <div v-if="selectedDemande.reference_brouillon.cover_image" class="flex flex-col items-center gap-2">
-                <img :src="`http://localhost:8000/storage/${selectedDemande.reference_brouillon.cover_image}`"
+              <div v-if="refBrouillon.cover_image" class="flex flex-col items-center gap-2">
+                <img :src="`http://localhost:8000/storage/${refBrouillon.cover_image}`"
                   alt="Couverture" class="w-24 h-36 object-cover rounded-xl shadow" />
                 <p class="text-xs text-[#94A3B8]">Couverture</p>
               </div>
-              <div v-if="selectedDemande.reference_brouillon.file_path">
-                <a :href="`http://localhost:8000/storage/${selectedDemande.reference_brouillon.file_path}`"
+              <div v-if="refBrouillon.file_path">
+                <a :href="`http://localhost:8000/storage/${refBrouillon.file_path}`"
                   target="_blank"
                   class="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium no-underline transition-all duration-200"
                   :class="theme.isDark ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-[#F8F6F6] text-[#2D2D2D] border border-[#ECECEC] hover:bg-[#ECECEC]'">

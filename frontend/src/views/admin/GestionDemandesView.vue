@@ -1,122 +1,265 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useThemeStore } from '@/stores/theme'
+import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
 import Select from 'primevue/select'
+import ConfirmDialog from 'primevue/confirmdialog'
+import { useDepositRequestsStore } from '@/stores/depositRequests'
+import { useUsersStore } from '@/stores/users'
+import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
+import { Loader2 } from 'lucide-vue-next'
 
-const theme = useThemeStore()
+import DemandeDetailDialog from '@/components/DemandeDetailDialog.vue'
 
-const demandes = ref([
-  { id: 1, title: 'Introduction aux algorithmes', auteur: 'Jean Kouassi', responsable: 'Marie Tall', status: 'validée par responsable', date: '17/06/2026', justification: null },
-  { id: 2, title: 'Droit des contrats', auteur: 'Paul Diallo', responsable: 'Marie Tall', status: 'refusée par responsable', date: '16/06/2026', justification: 'Format non conforme.' },
-  { id: 3, title: 'Histoire contemporaine', auteur: 'Sophie Kone', responsable: null, status: 'en attente', date: '15/06/2026', justification: null },
-])
+const theme        = useThemeStore()
+const router       = useRouter()
+const depositStore = useDepositRequestsStore()
+const usersStore   = useUsersStore()
+const toast        = useToast()
+const confirm      = useConfirm()
 
-const responsables = [
-  { label: 'Marie Tall', value: 1 },
-  { label: 'Ahmed Bah', value: 2 },
+const searchQuery  = ref('')
+const filterStatus = ref(null)
+const currentPage  = ref(1)
+const itemsPerPage = 8
+
+const statusOptions = [
+  { label: 'Tous les statuts',          value: null },
+  { label: 'En attente',                value: 'pending' },
+  { label: 'Validée par responsable',   value: 'approved_by_manager' },
+  { label: 'Refusée par responsable',   value: 'rejected_by_manager' },
+  { label: 'Publiée',                   value: 'published' },
+  { label: 'Rejetée',                   value: 'rejected' },
 ]
 
-const showJustifDialog = ref(false)
-const showAffecterDialog = ref(false)
-const selectedDemande = ref(null)
-const justification = ref('')
+const statusLabel = {
+  pending:             'En attente',
+  approved_by_manager: 'Validée · resp',
+  rejected_by_manager: 'Refusée · resp',
+  published:           'Publiée',
+  rejected:            'Rejetée',
+}
+const statusSeverity = {
+  pending:             'warn',
+  approved_by_manager: 'success',
+  rejected_by_manager: 'danger',
+  published:           'success',
+  rejected:            'danger',
+}
+
+const filtered = computed(() => {
+  let list = depositStore.requests
+  if (filterStatus.value) list = list.filter(d => d.status === filterStatus.value)
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase()
+    list = list.filter(d =>
+      d.title?.toLowerCase().includes(q) ||
+      `${d.applicant?.first_name} ${d.applicant?.last_name}`.toLowerCase().includes(q)
+    )
+  }
+  return list
+})
+
+const totalPages = computed(() => Math.ceil(filtered.value.length / itemsPerPage) || 1)
+const paginated  = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filtered.value.slice(start, start + itemsPerPage)
+})
+
+function resetPage() { currentPage.value = 1 }
+
+const responsables = computed(() =>
+  usersStore.users
+    .filter(u => u.role === 'responsable_demande' && u.status === 'active')
+    .filter(u => !selectedDemande || u.id !== selectedDemande.assigned_manager_id)
+    .map(u => ({ label: `${u.first_name} ${u.last_name}`, value: u.id }))
+)
+
+const showJustifDialog    = ref(false)
+const showAffecterDialog  = ref(false)
+const selectedDemande     = ref(null)
+const justification       = ref('')
 const selectedResponsable = ref(null)
-const actionType = ref('')
+const actionType          = ref('')
+
+onMounted(async () => {
+  await Promise.all([depositStore.fetchAll(), usersStore.fetchUsers()])
+})
 
 function ouvrirAction(d, action) {
-  selectedDemande.value = d
-  actionType.value = action
-  justification.value = ''
-  showJustifDialog.value = true
+  selectedDemande.value = d; actionType.value = action
+  justification.value = ''; showJustifDialog.value = true
 }
 
 function ouvrirAffecter(d) {
-  selectedDemande.value = d
-  selectedResponsable.value = null
+  selectedDemande.value = d; selectedResponsable.value = null
   showAffecterDialog.value = true
 }
 
-const statusSeverity = {
-  'en attente': 'warn',
-  'validée par responsable': 'success',
-  'refusée par responsable': 'danger',
-  'publiée': 'success',
-  'rejetée': 'danger',
+async function affecter() {
+  if (!selectedResponsable.value || !selectedDemande.value) return
+  const ok = await depositStore.assign(selectedDemande.value.id, selectedResponsable.value)
+  if (ok) { toast.add({ severity: 'success', summary: 'Affectée', detail: depositStore.message, life: 3000 }); showAffecterDialog.value = false }
+}
+
+function confirmerPublier(d) {
+  confirm.require({
+    message: `Publier "${d.title}" ? Elle sera visible par tous les utilisateurs.`,
+    header: 'Confirmer la publication',
+    acceptLabel: 'Publier',
+    rejectLabel: 'Annuler',
+    acceptClass: 'p-button-success',
+    accept: async () => {
+      const ok = await depositStore.publish(d.id)
+      toast.add({ severity: ok ? 'success' : 'error', summary: ok ? 'Publiée !' : 'Erreur', detail: ok ? depositStore.message : 'La publication a échoué.', life: 3000 })
+    }
+  })
+}
+
+async function confirmerAction() {
+  showJustifDialog.value = false
+  toast.add({ severity: 'info', summary: 'Action effectuée', life: 2000 })
+}
+
+// Voir détail
+const showDetailDialog = ref(false)
+const selectedDetail   = ref(null)
+function voirDetail(d) { selectedDetail.value = d; showDetailDialog.value = true }
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
+
+function goToLogs(d) {
+  router.push({ name: 'admin-logs', query: { depositRequestId: d.id } })
 }
 </script>
 
 <template>
   <div>
+    <ConfirmDialog />
+
     <div class="mb-6">
-      <h1 :class="['text-2xl font-bold', theme.isDark ? 'text-bordeaux-100' : 'text-bordeaux-900']">
-        Gestion des demandes
-      </h1>
-      <p :class="['text-sm', theme.isDark ? 'text-bordeaux-400' : 'text-bordeaux-600']">
-        Examinez, publiez ou rejetez les demandes de dépôt
-      </p>
+      <h1 :class="['text-2xl font-bold', theme.isDark ? 'text-bordeaux-100' : 'text-bordeaux-900']">Gestion des demandes</h1>
+      <p :class="['text-sm', theme.isDark ? 'text-bordeaux-400' : 'text-bordeaux-600']">{{ filtered.length }} demande{{ filtered.length > 1 ? 's' : '' }}</p>
     </div>
 
-    <div class="flex flex-col gap-4">
-      <div v-for="d in demandes" :key="d.id"
-        :class="['rounded-2xl p-5 backdrop-blur-xl border',
-          theme.isDark ? 'bg-white/5 border-white/10' : 'bg-white/30 border-white/50']">
+    <!-- Filtres -->
+    <div :class="['rounded-2xl p-4 mb-6 border flex flex-wrap gap-3', theme.isDark ? 'bg-white/5 border-white/10' : 'bg-white border-[#ECECEC] shadow-sm']">
+      <input v-model="searchQuery" @input="resetPage" placeholder="Rechercher un titre, un auteur..."
+        :class="['flex-1 min-w-48 px-4 py-2.5 rounded-xl text-sm outline-none transition-all',
+          theme.isDark ? 'bg-white/10 border border-white/10 text-white placeholder-white/30 focus:border-white/30' : 'bg-[#F8F6F6] border border-[#ECECEC] text-[#2D2D2D] placeholder-[#aaa] focus:border-[#7A0026]']" />
+      <Select v-model="filterStatus" @change="resetPage" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Tous les statuts" class="min-w-52" />
+    </div>
+
+    <!-- Loader -->
+    <div v-if="depositStore.loading" class="flex items-center justify-center py-16">
+      <Loader2 class="w-10 h-10 animate-spin text-bordeaux-600" />
+      <span class="ml-3 text-sm text-[#94A3B8]">Chargement...</span>
+    </div>
+
+    <!-- Liste -->
+    <div v-else-if="paginated.length" class="flex flex-col gap-4">
+      <div v-for="d in paginated" :key="d.id"
+        :class="['rounded-2xl p-5 border transition-all duration-200', theme.isDark ? 'bg-white/5 border-white/[0.07]' : 'bg-white border-[#ECECEC] shadow-sm hover:shadow-md']">
+        <!-- Partie principale -->
         <div class="flex items-start justify-between gap-4">
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-1 flex-wrap">
-              <h3 :class="['font-semibold', theme.isDark ? 'text-bordeaux-200' : 'text-bordeaux-800']">{{ d.title }}</h3>
-              <Tag :value="d.status" :severity="statusSeverity[d.status]" />
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 mb-2 flex-wrap">
+              <h3 :class="['font-semibold text-lg', theme.isDark ? 'text-white' : 'text-[#2D2D2D]']">{{ d.title }}</h3>
+              <Tag :value="statusLabel[d.status] || d.status" :severity="statusSeverity[d.status]" />
             </div>
-            <p :class="['text-xs mb-1', theme.isDark ? 'text-bordeaux-500' : 'text-bordeaux-400']">
-              Déposé par : {{ d.auteur }} · {{ d.date }}
+            <p :class="['text-sm', theme.isDark ? 'text-bordeaux-300' : 'text-[#555]']">
+              Déposé par <span class="font-medium">{{ d.applicant?.first_name }} {{ d.applicant?.last_name }}</span>
             </p>
-            <p v-if="d.responsable" :class="['text-xs', theme.isDark ? 'text-bordeaux-500' : 'text-bordeaux-400']">
-              Responsable : {{ d.responsable }}
+            <p :class="['text-sm mt-1', theme.isDark ? 'text-bordeaux-400' : 'text-[#777]']">
+              {{ formatDateTime(d.created_at) }}
             </p>
-            <div v-if="d.justification" :class="['mt-2 p-3 rounded-xl text-sm',
-              theme.isDark ? 'bg-red-900/20 text-red-300 border border-red-800/30' : 'bg-red-50 text-red-700 border border-red-200']">
-              <i class="pi pi-info-circle mr-1"></i> {{ d.justification }}
-            </div>
+            <p v-if="d.assignedManager" :class="['text-sm mt-1', theme.isDark ? 'text-green-300' : 'text-green-700']">
+              <i class="pi pi-check mr-1"></i> Responsable : {{ d.assignedManager.first_name }} {{ d.assignedManager.last_name }}
+            </p>
           </div>
 
           <div class="flex flex-col gap-2 shrink-0">
-            <Button v-if="d.status === 'validée par responsable'" label="Publier" icon="pi pi-check" size="small" severity="success" @click="ouvrirAction(d, 'publier')" />
-            <Button v-if="d.status === 'refusée par responsable'" label="Invalider le refus" icon="pi pi-undo" size="small" @click="ouvrirAction(d, 'invalider')" />
-            <Button v-if="d.status === 'refusée par responsable'" label="Rejeter définitivement" icon="pi pi-times" size="small" severity="danger" outlined @click="ouvrirAction(d, 'rejeter')" />
-            <Button label="Second avis" icon="pi pi-user-edit" size="small" outlined @click="ouvrirAffecter(d)" />
+            <Button v-if="d.status === 'approved_by_manager'" label="Publier" icon="pi pi-check" size="small" severity="success" @click="confirmerPublier(d)" />
+            <Button v-if="d.status === 'rejected_by_manager'" label="Invalider le refus" icon="pi pi-undo" size="small" @click="ouvrirAction(d, 'invalider')" />
+            <Button v-if="d.status === 'rejected_by_manager'" label="Rejeter" icon="pi pi-times" size="small" severity="danger" outlined @click="ouvrirAction(d, 'rejeter')" />
+            <Button v-if="!['published','rejected'].includes(d.status)" :label="d.assignedManager ? 'Réaffecter' : 'Affecter'" icon="pi pi-user-edit" size="small" outlined @click="ouvrirAffecter(d)" />
+            <Button label="Voir historique" icon="pi pi-history" size="small" text @click="goToLogs(d)" />
+            <button @click="voirDetail(d)"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[#60a5fa] bg-[#60a5fa]/10 hover:bg-[#60a5fa]/20">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+              </svg>
+              Analyser
+            </button>
           </div>
+        </div>
+
+        <div v-if="d.justification" class="mt-4 p-3 rounded-xl text-sm" :class="theme.isDark ? 'bg-red-900/20 text-red-300 border border-red-800/20' : 'bg-red-50 text-red-700 border border-red-200'">
+          <i class="pi pi-info-circle mr-1"></i>{{ d.justification }}
         </div>
       </div>
     </div>
 
-    <!-- Dialog action avec justification -->
-    <Dialog v-model:visible="showJustifDialog" :header="actionType === 'publier' ? 'Confirmer la publication' : 'Justification'" :modal="true" :style="{ width: '480px' }">
-      <p class="text-sm text-gray-600 mb-3">
+    <!-- Vide -->
+    <div v-else class="flex flex-col items-center justify-center py-16">
+      <i class="pi pi-inbox text-5xl text-[#94A3B8] mb-3 block"></i>
+      <p class="font-medium text-[#94A3B8]">Aucune demande trouvée</p>
+    </div>
+
+    <!-- Pagination -->
+    <div v-if="totalPages > 1" class="flex items-center justify-between mt-6">
+      <p class="text-xs text-[#94A3B8]">Page {{ currentPage }} / {{ totalPages }} · {{ filtered.length }} résultat{{ filtered.length > 1 ? 's' : '' }}</p>
+      <div class="flex items-center gap-1">
+        <button :disabled="currentPage === 1" @click="currentPage--"
+          :class="['w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all disabled:opacity-30', theme.isDark ? 'text-white/70 hover:bg-white/10' : 'text-[#555] hover:bg-[#F8F6F6] border border-[#ECECEC]']">
+          <i class="pi pi-chevron-left text-xs"></i>
+        </button>
+        <button v-for="p in totalPages" :key="p" @click="currentPage = p"
+          :class="['w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium transition-all',
+            p === currentPage ? 'bg-[#7A0026] text-white' : (theme.isDark ? 'text-white/60 hover:bg-white/10' : 'text-[#555] hover:bg-[#F8F6F6] border border-[#ECECEC]')
+          ]">
+          {{ p }}
+        </button>
+        <button :disabled="currentPage === totalPages" @click="currentPage++"
+          :class="['w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all disabled:opacity-30', theme.isDark ? 'text-white/70 hover:bg-white/10' : 'text-[#555] hover:bg-[#F8F6F6] border border-[#ECECEC]']">
+          <i class="pi pi-chevron-right text-xs"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dialog justification -->
+    <Dialog v-model:visible="showJustifDialog" :header="actionType === 'invalider' ? 'Invalider le refus' : 'Rejeter définitivement'" :modal="true" :style="{ width: '480px' }">
+      <p class="text-sm mb-3" :class="theme.isDark ? 'text-white/60' : 'text-[#777]'">
         <span v-if="actionType === 'invalider'">Expliquez pourquoi vous passez outre le refus du responsable.</span>
-        <span v-else-if="actionType === 'rejeter'">Confirmez le rejet définitif de cette demande.</span>
-        <span v-else>Confirmez la publication de cette référence.</span>
+        <span v-else>Confirmez le rejet définitif et fournissez une justification.</span>
       </p>
-      <Textarea v-if="actionType !== 'publier'" v-model="justification" rows="4" class="w-full" placeholder="Justification..." />
+      <Textarea v-model="justification" rows="4" class="w-full" placeholder="Justification obligatoire..." />
       <template #footer>
         <Button label="Annuler" text @click="showJustifDialog = false" />
-        <Button
-          :label="actionType === 'publier' ? 'Publier' : actionType === 'rejeter' ? 'Rejeter' : 'Confirmer'"
-          :severity="actionType === 'rejeter' ? 'danger' : 'success'"
-          @click="showJustifDialog = false"
-        />
+        <Button :label="actionType === 'rejeter' ? 'Rejeter définitivement' : 'Confirmer'" :severity="actionType === 'rejeter' ? 'danger' : 'success'" :disabled="!justification.trim()" @click="confirmerAction" />
       </template>
     </Dialog>
 
-    <!-- Dialog affecter -->
+    <!-- Dialog affectation -->
     <Dialog v-model:visible="showAffecterDialog" header="Affecter à un responsable" :modal="true" :style="{ width: '420px' }">
-      <p class="text-sm text-gray-600 mb-3">Choisissez un responsable pour obtenir un second avis.</p>
+      <p class="text-sm mb-3" :class="theme.isDark ? 'text-white/60' : 'text-[#777]'">Choisissez un responsable disponible.</p>
       <Select v-model="selectedResponsable" :options="responsables" optionLabel="label" optionValue="value" placeholder="Choisir un responsable" class="w-full" />
+      <p v-if="!responsables.length" class="text-xs text-red-400 mt-2">Aucun responsable actif disponible.</p>
       <template #footer>
         <Button label="Annuler" text @click="showAffecterDialog = false" />
-        <Button label="Affecter" :disabled="!selectedResponsable" @click="showAffecterDialog = false" />
+        <Button label="Affecter" :disabled="!selectedResponsable" @click="affecter" />
       </template>
     </Dialog>
   </div>

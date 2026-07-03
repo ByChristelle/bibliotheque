@@ -9,6 +9,7 @@ import Button from 'primevue/button'
 import { useCategoriesStore } from '@/stores/categories'
 import { useToast } from 'primevue/usetoast'
 import { useDepositRequestsStore } from '@/stores/depositRequests'
+import { useAuthStore } from '@/stores/auth'
 
 
 const theme = useThemeStore()
@@ -16,6 +17,7 @@ const router = useRouter()
 const toast  = useToast()
 const categoriesStore = useCategoriesStore()
 const depositStore = useDepositRequestsStore()
+const auth = useAuthStore()
 
 onMounted(async () => {
   await categoriesStore.fetchCategories()
@@ -24,6 +26,12 @@ onMounted(async () => {
 const categoriesOptions = computed(() =>
   categoriesStore.categories.map(c => ({ label: c.name, value: c.id }))
 )
+
+onMounted(() => {
+  if (auth.user?.status === 'inactive') {
+    showInactifDialog.value = true
+  }
+})
 
 const languageOptions = [
   { label: 'Français', value: 'fr' },
@@ -69,7 +77,13 @@ function onFileChange(e) {
   form.value.file = e.target.files[0] ?? null
 }
 
+const showInactifDialog = ref(false)
 async function submit() {
+
+    if (auth.user?.status === 'inactive') {
+    showInactifDialog.value = true
+    return
+  }
   const formData = new FormData()
 
   formData.append('title',           form.value.title)
@@ -114,7 +128,7 @@ async function submit() {
       </p>
     </div>
 
-    <div :class="['rounded-2xl p-6 backdrop-blur-xl border',
+    <div  :class="['rounded-2xl p-6 backdrop-blur-xl border',
       theme.isDark ? 'bg-white/5 border-white/10' : 'bg-white/30 border-white/50']">
       <form @submit.prevent="submit" class="flex flex-col gap-5">
 
@@ -238,5 +252,30 @@ async function submit() {
 
       </form>
     </div>
+   
+
+    <Dialog  v-model:visible="showInactifDialog" header="Compte inactif" :modal="true" :style="{ width: '420px' }">
+  <div class="flex flex-col items-center gap-4 py-2 text-center">
+    <div class="w-14 h-14 rounded-full bg-yellow-100 flex items-center justify-center">
+      <i class="pi pi-lock text-2xl text-yellow-600"></i>
+    </div>
+    <div>
+      <p class="text-sm font-medium text-[#2D2D2D] mb-2">
+        Votre compte est actuellement <strong>inactif</strong>.
+      </p>
+      <p class="text-sm text-[#777]">
+        Pour soumettre une demande, veuillez contacter l'administration afin d'activer votre compte.
+      </p>
+      <div class="mt-4 p-3 rounded-xl bg-[#F8F6F6] border border-[#ECECEC]">
+        <p class="text-xs text-[#777] mb-1">Numéro de contact</p>
+        <p class="text-base font-bold text-[#7A0026]">+655-19-15-94</p>
+      </div>
+    </div>
+  </div>
+  <template #footer>
+    <Button label="Fermer" @click="showInactifDialog = false" />
+  </template>
+</Dialog>
+
   </div>
 </template>

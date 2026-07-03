@@ -21,7 +21,6 @@ class AuthController extends Controller
         $validated = $request->validated();
 
         // 2. Créer l'utilisateur en base de données
-        // Le rôle ('user') est géré par la valeur par défaut de votre migration
         $user = User::create([
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
