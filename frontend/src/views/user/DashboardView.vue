@@ -58,7 +58,7 @@ function allerNouvelledemande() {
     <!-- Salutation -->
     <div class="mb-6">
       <h1 :class="['text-2xl font-bold', theme.isDark ? 'text-bordeaux-100' : 'text-bordeaux-900']">
-        Bonjour, {{ auth.user?.first_name }} 
+        Bienvenue {{ auth.user?.first_name }} 
       </h1>
       <p :class="['text-sm', theme.isDark ? 'text-bordeaux-400' : 'text-bordeaux-600']">
         Voici un aperçu de votre activité

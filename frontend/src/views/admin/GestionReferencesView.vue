@@ -54,7 +54,7 @@ const statusLabel = {
 }
 
 function lire(ref) {
-  if (ref.file_path) window.open(`http://localhost:8000/api/references/${ref.id}/download`, '_blank')
+  if (ref.file_path) window.open(`http://localhost:8000/api/references/${ref.id}/lire`, '_blank')
 }
 
 function telecharger(ref) {
