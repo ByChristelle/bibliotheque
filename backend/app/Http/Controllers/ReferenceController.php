@@ -75,14 +75,14 @@ class ReferenceController extends Controller
 
 
 // Pour la fonction LIRE : Affiche le fichier dans le navigateur
-public function lire($id)
+public function lire(int $id)
 {
     $reference = Reference::findOrFail($id);
-    $path = storage_path('app/public/' . $reference->file_path); // Adaptez le chemin selon votre stockage
+    $path = storage_path('app/public/' . $reference->file_path); 
 
     // La méthode file() configure automatiquement le Content-Disposition sur 'inline'
     return response()->file($path, [
-        'Content-Type' => 'application/pdf', // Force le navigateur à l'interpréter comme un PDF
+        'Content-Type' => 'application/pdf', 
     ]);
 }
 

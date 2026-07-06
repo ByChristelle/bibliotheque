@@ -3,13 +3,30 @@ import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
 import { useAuthStore } from '@/stores/auth'
+import { useConfirm } from 'primevue/useconfirm'
+// import ConfirmDialog from 'primevue/confirmdialog'
 
 const theme = useThemeStore()
 const route  = useRoute()
 const auth   = useAuthStore()
 const router = useRouter()
+const confirm = useConfirm()
 
 const sidebarOpen = ref(true)
+
+function confirmLogout() {
+  confirm.require({
+    message: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+    header: 'Confirmation de déconnexion',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Oui',
+    rejectLabel: 'Non',
+    acceptClass: 'p-button-danger',
+    accept: () => {
+      auth.logout()
+    }
+  })
+}
 
 const menus = {
   user: [
@@ -76,13 +93,16 @@ const userInitials= computed(() => {
           :class="theme.isDark ? 'text-white' : 'text-[#7A0026]'">
           BiblioConnect
         </span>
-        <button
-          class="ml-auto w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
-          :class="theme.isDark ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-[#777] hover:text-[#7A0026] hover:bg-[#F8F6F6]'"
-          @click="sidebarOpen = !sidebarOpen"
-        >
-          <i :class="sidebarOpen ? 'pi pi-chevron-left text-xs' : 'pi pi-chevron-right text-xs'"></i>
-        </button>
+       <button
+  class="ml-auto w-7 h-7 rounded-lg flex flex-col items-center justify-center gap-1 transition-all duration-200"
+  :class="theme.isDark ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-[#777] hover:text-[#7A0026] hover:bg-[#F8F6F6]'"
+  @click="sidebarOpen = !sidebarOpen"
+>
+  <!-- Les 3 barres du menu burger -->
+  <span class="w-4 h-0.5 bg-current transition-transform duration-200" :class="{'rotate-45 translate-y-1.5': sidebarOpen}"></span>
+  <span class="w-4 h-0.5 bg-current transition-opacity duration-200" :class="{'opacity-0': sidebarOpen}"></span>
+  <span class="w-4 h-0.5 bg-current transition-transform duration-200" :class="{'-rotate-45 -translate-y-1.5': sidebarOpen}"></span>
+</button>
       </div>
 
       <!-- Navigation -->
@@ -128,14 +148,35 @@ const userInitials= computed(() => {
           <i :class="[theme.isDark ? 'pi pi-sun' : 'pi pi-moon', 'text-base shrink-0']"></i>
           <span v-if="sidebarOpen">{{ theme.isDark ? 'Mode clair' : 'Mode sombre' }}</span>
         </button>
-        <button
-          :class="['flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 w-full',
-            !sidebarOpen && 'justify-center',
-            theme.isDark ? 'text-red-300 hover:text-white hover:bg-red-600/20' : 'text-red-500 hover:bg-red-50']"
-          @click="auth.logout()">
-          <i class="pi pi-sign-out text-base shrink-0"></i>
-          <span v-if="sidebarOpen">Déconnexion</span>
-        </button>
+     
+<button
+  :class="['flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 w-full relative group',
+    !sidebarOpen && 'justify-center',
+    theme.isDark ? 'text-red-300 hover:text-white hover:bg-red-600/20' : 'text-red-500 hover:bg-red-50']"
+  @click="confirmLogout()"
+>
+  <!-- Le SVG -->
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    stroke-width="2" 
+    stroke="currentColor" 
+    class="w-5 h-5 shrink-0"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+  </svg>
+
+  <!-- Texte normal si ouvert -->
+  <span v-if="sidebarOpen">Déconnexion</span>
+
+  <!-- Infobulle au survol si fermé -->
+  <span v-if="!sidebarOpen" 
+    class="absolute left-full ml-3 px-2 py-1 text-xs text-white bg-gray-900 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50 shadow-md">
+    Déconnexion
+  </span>
+</button>
+        
       </div>
     </aside>
 
@@ -179,5 +220,6 @@ const userInitials= computed(() => {
         <RouterView />
       </main>
     </div>
+    <!-- <ConfirmDialog /> -->
   </div>
 </template>

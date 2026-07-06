@@ -45,7 +45,7 @@ public function index(): JsonResponse
         ], 200);
     }
 
-    //Pour la création 
+    //Pour la création de la demande
     public function store(StoreDepositRequestRequest $request): JsonResponse
     {
     $this->authorize('create' , DepositRequest::class);
@@ -219,7 +219,7 @@ public function publish(int $id): JsonResponse
         'language'         => $brouillon->language,
         'document_type'    => $brouillon->document_type,
         'category_id'      => $brouillon->category_id,
-        'publisher_id'     => 1, // TODO: à lier au brouillon si nécessaire
+        'publisher_id'     => 1, //à lier au brouillon si nécessaire
         'uploaded_by'      => $depositRequest->applicant_id,
         'cover_image'      => $brouillon->cover_image,
         'file_path'        => $brouillon->file_path,

@@ -9,10 +9,9 @@ export const useDepositRequestsStore = defineStore('depositRequests', {
     message: null,
     pendingCount:0,
     selectedRequest: null,
-showAssignDialog: false,
-assignedRequests: [],
-myRequests:[],
-
+    showAssignDialog: false,
+    assignedRequests: [],
+    myRequests: [],
   }),
 
   actions: {
@@ -49,6 +48,7 @@ myRequests:[],
         this.loading = false
       }
     },
+
 //La récupération pour le compte de la vue de l'admin
     async fetchAll() {
   this.loading = true

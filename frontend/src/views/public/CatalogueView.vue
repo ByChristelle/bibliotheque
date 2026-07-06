@@ -101,7 +101,6 @@ function formatAuthors(authors) {
         :key="ref.id"
         :class="['relative rounded-2xl p-5 border-2 transition-all duration-200 hover:shadow-md flex flex-col justify-between',
           theme.isDark ? 'bg-stone-800 border-[#5c1c2e] hover:border-[#8a2b43]' : 'bg-[#faf8f5] border-[#5a1827] hover:bg-[#fcfbfa]']"
-        @click="router.push(`/references/${ref.id}`)"
       >
         <!-- Section Supérieure : Image + Textes -->
         <div class="flex items-start gap-4 mb-5">
@@ -133,13 +132,18 @@ function formatAuthors(authors) {
         <!-- Section Inférieure : Boutons d'actions empilés & Bouton J'aime -->
         <div class="mt-auto pt-2 flex flex-col gap-2">
           <!-- Bouton Lire (Si disponible/Logique) -->
-          <button class="w-full py-2 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors bg-[#b09e99]/30 text-[#5c4d4d] hover:bg-[#b09e99]/40">
-            <i class="pi pi-file text-xs"></i> Lire
+         
+          <button class="w-full py-2 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors bg-[#b09e99]/30 text-[#5c4d4d] hover:bg-[#b09e99]/40"  >
+               <RouterLink to="/inscription" >
+          <i class="pi pi-file text-xs"></i>  Lire
+          </RouterLink>
           </button>
 
           <!-- Bouton Télécharger -->
           <button class="w-full py-2 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors bg-[#b09e99]/30 text-[#5c4d4d] hover:bg-[#b09e99]/40">
-            <i class="pi pi-download text-xs"></i> Télécharger
+           <RouterLink to="/inscription" >
+          <i class="pi pi-file text-xs"></i>  Telecharger
+          </RouterLink>
           </button>
 
           <!-- Bouton Détails / Voir Plus -->

@@ -150,7 +150,7 @@ const statCards = computed(() => {
         </div>
       </div>
 
-      <!-- Cadre dépôts en attente (CTA) -->
+      <!-- Cadre dépôts en attente -->
       <div
         :class="['rounded-2xl p-6 cursor-pointer transition-all hover:-translate-y-0.5 border-2',
           theme.isDark ? 'bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/15' : 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100']"
@@ -178,7 +178,7 @@ const statCards = computed(() => {
         </div>
         <p :class="['text-xs mt-3 flex items-center gap-1', theme.isDark ? 'text-yellow-500' : 'text-yellow-600']">
           Cliquez pour affecter les demandes
-          <i class="pi pi-arrow-right text-xs"></i>
+        <i class="pi pi-arrow-right text-xs"></i>
         </p>
       </div>
     </template>

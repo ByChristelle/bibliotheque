@@ -21,10 +21,13 @@ startStatusPolling() {
   this.pollingInterval = setInterval(async () => {
     if (this.user) {
       await this.fetchUser();
+      // if(user.status==='suspended'){
+      // await this.logout();
+      // }
     } else {
       this.stopStatusPolling();
     }
-  }, 30000);
+  }, 3000000);
 },
 
 stopStatusPolling() {

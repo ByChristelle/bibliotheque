@@ -142,6 +142,7 @@ function formatDate(dateStr) {
     </div>
 
     <!-- Dialog affectation -->
+     <!-- :draggable=false -->
     <Dialog
       v-model:visible="depositStore.showAssignDialog"
       header="Affecter à un responsable"
