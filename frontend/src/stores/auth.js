@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '../services/axios';
+import echo from '../plugins/echo';
 
 export const useAuthStore = defineStore('auth', {
     persist:true,
@@ -8,7 +9,7 @@ export const useAuthStore = defineStore('auth', {
     message:null,
     loading: false,
     errors: {} ,
-    pollingInterval:null,
+    // pollingInterval:null,
     
   }),
 
@@ -16,28 +17,40 @@ export const useAuthStore = defineStore('auth', {
 
 
     
-startStatusPolling() {
-  // Vérifie le statut toutes les 30 secondes (30000ms)
-  this.pollingInterval = setInterval(async () => {
-    if (this.user) {
-      await this.fetchUser();
-      // if(user.status==='suspended'){
-      // await this.logout();
-      // }
-    } else {
-      this.stopStatusPolling();
-    }
-  }, 3000000);
-},
+// startStatusPolling() {
+//   // Vérifie le statut toutes les 30 secondes (30000ms)
+//   this.pollingInterval = setInterval(async () => {
+//     if (this.user) {
+//       await this.fetchUser();
+//       // if(user.status==='suspended'){
+//       // await this.logout();
+//       // }
+//     } else {
+//       this.stopStatusPolling();
+//     }
+//   }, 3000);
+// },
 
-stopStatusPolling() {
-  if (this.pollingInterval) {
-    clearInterval(this.pollingInterval);
-    this.pollingInterval = null;
+// stopStatusPolling() {
+//   if (this.pollingInterval) {
+//     clearInterval(this.pollingInterval);
+//     this.pollingInterval = null;
+//   }
+// },
+
+    //pour inscription 
+    
+    listenSuspension() {
+  if (this.user) {
+    echo.private(`user.${this.user.id}`)
+      .listen('UserSuspended', async () => {
+          console.log('EVENT RECU : utilisateur suspendu');
+        this.message = 'Votre compte a été suspendu. Veuillez contacter l\'administrateur.';
+        await this.logout();
+      });
   }
 },
 
-    //pour inscription 
     async register(formData) {
       this.loading = true;
       this.errors = {};
@@ -80,7 +93,8 @@ stopStatusPolling() {
     
     // 3. Stocker les infos de l'utilisateur connecté
     this.user = response.data.user;
-     this.startStatusPolling(); 
+    //  this.startStatusPolling(); 
+    this.listenSuspension();
     return true;
   } catch (error) {
     if (error.response && error.response.status === 422) {
@@ -127,7 +141,7 @@ async fetchUser() {
 }
 ,
 async logout() {
-  this.stopStatusPolling();
+  // this.stopStatusPolling();
   this.loading = true;
   try {
     // 1. Appeler le serveur pour détruire la session Laravel

@@ -31,4 +31,6 @@ app.use(router)
 
 const auth= useAuthStore()
 await auth.fetchUser()
+if (auth.user) auth.listenSuspension()
+
 app.mount('#app')

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use App\Events\UserSuspended;
 // use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
@@ -73,6 +74,9 @@ class UserController extends Controller
     if (isset($data['status'])) $user->status = $data['status'];
 
     $user->save();
+    if ($user->status === 'suspended') {
+    event(new UserSuspended($user->id));
+}
 
     return response()->json([
         'user' => $user,
