@@ -9,6 +9,7 @@ import ConfirmationService from 'primevue/confirmationservice'
 import BordeauxPreset from '@/theme/bordeaux.js'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { useAuthStore } from './stores/auth'
+import  './plugins/echo';
 
 
 const app = createApp(App)
@@ -25,12 +26,17 @@ app.use(PrimeVue, {
     }
   }
 })
+
+
 app.use(ToastService)
 app.use(ConfirmationService)
 app.use(router)
 
+
+
 const auth= useAuthStore()
 await auth.fetchUser()
-if (auth.user) auth.listenSuspension()
+// if(auth.user) auth.listenSuspension()
+
 
 app.mount('#app')

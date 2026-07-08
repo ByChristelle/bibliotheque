@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -19,6 +19,8 @@ const submit = async () => {
     console.error('erreur de connexion', error)
   }
 }
+
+
 </script>
 
 <template>

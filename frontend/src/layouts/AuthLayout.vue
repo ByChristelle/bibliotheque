@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
 import { useAuthStore } from '@/stores/auth'
@@ -72,6 +72,20 @@ const userName    = computed(() => auth.user ? `${auth.user.first_name} ${auth.u
 const userInitials= computed(() => {
   if (!auth.user) return 'U'
   return `${auth.user.first_name?.[0] ?? ''}${auth.user.last_name?.[0] ?? ''}`.toUpperCase()
+})
+
+
+onMounted(()=>{
+  console.log(auth.user.id);
+  Echo.channel(`userChannel`)
+        .listen('.UserSuspended', async (e) => {
+      console.log(e);
+      
+      console.log('EVENT RECU : utilisateur suspendu');
+        // this.message = 'Votre compte a été suspendu. Veuillez contacter l\'administrateur.';
+        // await this.logout();
+      });
+
 })
 </script>
 

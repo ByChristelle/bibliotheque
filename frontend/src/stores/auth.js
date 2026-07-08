@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '../services/axios';
-import echo from '../plugins/echo';
+
 
 export const useAuthStore = defineStore('auth', {
     persist:true,
@@ -15,8 +15,6 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
 
-
-    
 // startStatusPolling() {
 //   // Vérifie le statut toutes les 30 secondes (30000ms)
 //   this.pollingInterval = setInterval(async () => {
@@ -42,9 +40,13 @@ export const useAuthStore = defineStore('auth', {
     
     listenSuspension() {
   if (this.user) {
-    echo.private(`user.${this.user.id}`)
-      .listen('UserSuspended', async () => {
-          console.log('EVENT RECU : utilisateur suspendu');
+    console.log(`Écoute des événements de suspension pour l'utilisateur ${this.user.id}`);
+    
+    Echo.channel(`userChannel`)
+    .listen('.UserSuspended', async (e) => {
+      console.log(e);
+      
+      console.log('EVENT RECU : utilisateur suspendu');
         this.message = 'Votre compte a été suspendu. Veuillez contacter l\'administrateur.';
         await this.logout();
       });
@@ -94,7 +96,7 @@ export const useAuthStore = defineStore('auth', {
     // 3. Stocker les infos de l'utilisateur connecté
     this.user = response.data.user;
     //  this.startStatusPolling(); 
-    this.listenSuspension();
+    // this.listenSuspension();
     return true;
   } catch (error) {
     if (error.response && error.response.status === 422) {
@@ -120,7 +122,6 @@ export const useAuthStore = defineStore('auth', {
     return routes[role] || '/'
 
 },
-
 
 
 async fetchUser() {

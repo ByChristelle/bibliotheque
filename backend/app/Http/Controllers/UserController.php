@@ -74,8 +74,8 @@ class UserController extends Controller
     if (isset($data['status'])) $user->status = $data['status'];
 
     $user->save();
-    if ($user->status === 'suspended') {
-    event(new UserSuspended($user->id));
+ if ($user->wasChanged('status') && $user->status === 'suspended') {
+    event(new UserSuspended($user->id , 'Votre compte a été suspendu. Veuillez contacter l\'administrateur.'));
 }
 
     return response()->json([

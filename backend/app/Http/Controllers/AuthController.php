@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserSuspended;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
@@ -69,6 +70,8 @@ class AuthController extends Controller
 
     }
 
+    broadcast(new UserSuspended($user->id , 'Login'));
+
     // 4. Retourner l'utilisateur au Frontend
     return response()->json([
         'message' => 'Connexion réussie.',
@@ -79,6 +82,8 @@ class AuthController extends Controller
 
 public function logout(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
 {
+
+    broadcast(new UserSuspended($request->user()->id , 'Logout'));
     // 1. Déconnecter l'utilisateur du garde de session
     Auth::guard('web')->logout();
 
@@ -87,6 +92,8 @@ public function logout(\Illuminate\Http\Request $request): \Illuminate\Http\Json
 
     // 3. Régénérer le jeton CSRF pour éviter les attaques après déconnexion
     $request->session()->regenerateToken();
+
+
 
     return response()->json([
         'message' => 'Déconnexion réussie.'
